@@ -1,5 +1,5 @@
 type ExampleEntity @entity {
-  id: Bytes!
-  count: BigInt!
-  orderHash: Bytes! # bytes32
+    id: Bytes!
+    count: BigInt!
+    orderHash: Bytes! # bytes32
 }

@@ -1,8 +1,54 @@
 {
-  "mainnet": {
-    "Contract": {
-      "address": "0xb4fa284689c9784a60d840eb136bb16c5246191f",
-      "startBlock": 0
+    "mainnet": {
+        "ZeroExProxy": {
+            "address": "0xdef1c0ded9bec7f1a1670819833240f027b25eff",
+            "startBlock": 10247094
+        },
+        "FlashWallet": {
+            "address": "0x22f9dcf4647084d6c31b2765f6910cd85c178c18",
+            "startBlock": 10286653
+        },
+        "UniswapV2Factory": {
+            "address": "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
+            "startBlock": 10000835
+        },
+        "SushiSwapFactory": {
+            "address": "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac",
+            "startBlock": 10794229
+        },
+        "PancakeSwapFactory": {
+            "address": "0x1097053Fd2ea711dad45caCcc45EfF7548fCB362",
+            "startBlock": 15614590
+        },
+        "UniswapV3Factory": {
+            "address": "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+            "startBlock": 12369621
+        }
+    },
+    "optimism": {
+        "ZeroExProxy": {
+            "address": "0xdef1abe32c034e558cdd535791643c58a13acc10",
+            "startBlock": 1451368
+        },
+        "FlashWallet": {
+            "address": "0xa3128d9b7cca7d5af29780a56abeec12b05a6740",
+            "startBlock": 1451423
+        },
+        "UniswapV2Factory": {
+            "address": "0x0000000000000000000000000000000000000000",
+            "startBlock": 1451368
+        },
+        "SushiSwapFactory": {
+            "address": "0x0000000000000000000000000000000000000000",
+            "startBlock": 1451368
+        },
+        "PancakeSwapFactory": {
+            "address": "0x0000000000000000000000000000000000000000",
+            "startBlock": 1451368
+        },
+        "UniswapV3Factory": {
+            "address": "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+            "startBlock": 0
+        }
     }
-  }
 }

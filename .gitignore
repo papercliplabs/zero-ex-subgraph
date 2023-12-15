@@ -1,0 +1,7 @@
+.vs_code
+
+node_modules
+generated
+build
+
+.env

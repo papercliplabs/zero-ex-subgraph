@@ -1,18 +1,26 @@
 {
-  "name": "0x-protocol-mainnet",
-  "license": "UNLICENSED",
-  "scripts": {
-    "codegen": "graph codegen",
-    "build": "graph build",
-    "deploy": "graph deploy --node https://api.thegraph.com/deploy/ papercliplabs/0x-protocol-mainnet",
-    "create-local": "graph create --node http://localhost:8020/ papercliplabs/0x-protocol-mainnet",
-    "remove-local": "graph remove --node http://localhost:8020/ papercliplabs/0x-protocol-mainnet",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 papercliplabs/0x-protocol-mainnet",
-    "test": "graph test"
-  },
-  "dependencies": {
-    "@graphprotocol/graph-cli": "0.57.0",
-    "@graphprotocol/graph-ts": "0.30.0"
-  },
-  "devDependencies": { "matchstick-as": "0.5.0" }
+    "name": "0x-protocol-mainnet",
+    "license": "UNLICENSED",
+    "scripts": {
+        "codegen": "graph codegen",
+        "build:mainnet": "graph build --network=mainnet",
+        "deploy-hosted:mainnet": "source .env; graph deploy --node https://api.thegraph.com/deploy/ papercliplabs/0x-protocol-mainnet --access-token $HOSTED_ACCESS_TOKEN",
+        "deploy-studio:mainnet": "source .env; graph deploy --studio 0x-protocol-mainnet --deploy-key $STUDIO_DEPLOY_KEY",
+        "auto-deploy:mainnet": "yarn codegen; yarn build:mainnet; yarn deploy-hosted:mainnet; yarn deploy-studio:mainnet --version-label $1",
+        "build:optimism": "graph build --network=optimism",
+        "deploy-hosted:optimism": "source .env; graph deploy --node https://api.thegraph.com/deploy/ papercliplabs/0x-protocol-optimism --access-token $HOSTED_ACCESS_TOKEN",
+        "deploy-studio:optimism": "source .env; graph deploy --studio 0x-protocol-optimism --deploy-key $STUDIO_DEPLOY_KEY",
+        "auto-deploy:optimism": "yarn codegen; yarn build:optimism; yarn deploy-hosted:optimism; yarn deploy-studio:optimism --version-label $1",
+        "create-local": "graph create --node http://localhost:8020/ papercliplabs/0x-protocol-mainnet",
+        "remove-local": "graph remove --node http://localhost:8020/ papercliplabs/0x-protocol-mainnet",
+        "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 papercliplabs/0x-protocol-mainnet",
+        "test": "graph test"
+    },
+    "dependencies": {
+        "@graphprotocol/graph-cli": "0.57.0",
+        "@graphprotocol/graph-ts": "0.30.0"
+    },
+    "devDependencies": {
+        "matchstick-as": "0.5.0"
+    }
 }

@@ -1,0 +1,39 @@
+[
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "bytes32",
+                "name": "source",
+                "type": "bytes32"
+            },
+            {
+                "indexed": false,
+                "internalType": "contract IERC20Token",
+                "name": "inputToken",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "contract IERC20Token",
+                "name": "outputToken",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "inputTokenAmount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "outputTokenAmount",
+                "type": "uint256"
+            }
+        ],
+        "name": "BridgeFill",
+        "type": "event"
+    }
+]
