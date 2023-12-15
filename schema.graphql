@@ -1,5 +1,173 @@
-type ExampleEntity @entity {
+####
+# Foundation
+####
+
+type Transaction @entity {
+    "Transaction hash"
     id: Bytes!
-    count: BigInt!
-    orderHash: Bytes! # bytes32
+    "Transaction hash"
+    hash: Bytes!
+    "Block number this transaction is part of"
+    blockNumber: Bytes!
+    "Timestamp of this transaction in UTC"
+    timestamp: BigInt!
+
+    "Address the transaction is from"
+    from: Bytes!
+    "Address the transaction is to"
+    to: Bytes!
+
+    "Gas limit for the transaction"
+    gasLimit: BigInt!
+    "Gas price for the transaction"
+    gasPrice: BigInt!
+    "Amount of gas used - optional since not all graph node versions support"
+    gasUsed: BigInt
+    # "Amount of gas used in USD - optional since not all graph node versions support"
+    # gasUsedUsd: BigDecimal
+
+    # Counts for filtering
+
+    # Derived
+    erc20Fills: [Erc20Fill!]! @derivedFrom(field: "transaction")
+}
+
+type Account @entity {
+    "Address"
+    id: Bytes!
+    "Account address"
+    address: Bytes!
+}
+
+type Erc20Token @entity {
+    "Token address"
+    id: Bytes!
+    "Token address"
+    address: Bytes!
+    "Token name"
+    name: String!
+    "Token symbol"
+    symbol: String!
+    "Token decimals"
+    decimals: Int!
+}
+
+type Nft @entity {
+    id: Bytes!
+
+    address: Bytes!
+
+    name: String
+}
+
+####
+# Swaps
+####
+
+# type Swap @entity {
+#     id: Bytes!
+
+#     trader: Account!
+#     filler: Account!
+
+#     "Input token to the fill, this is the maker token for native orders"
+#     inputToken: Erc20Token!
+#     "Output token being filled, this is the taker token for native orders"
+#     outputToken: Erc20Token!
+
+#     "Amount of input tokens in the fill"
+#     inputTokenAmount: BigInt!
+#     "Amount of output tokens in the fill"
+#     outputTokenAmount: BigInt!
+
+#     fills: [Erc20Fill!]!
+# }
+
+# enum NativeNftOrderType {
+#     Erc721
+#     Erc1155
+# }
+
+# enum NativeNftOrderDir {
+#     Sell
+#     Buy
+# }
+
+# type NftOrderFill @entity {
+#     id: Bytes!
+#     transaction: Transaction!
+
+#     type: NativeNftOrderType!
+#     direction: NativeNftOrderDir!
+
+#     maker: Account!
+#     taker: Account!
+
+#     nonce: BigInt!
+
+#     erc20Token: Erc20Token!
+#     erc20TokenAmount: BigInt!
+
+#     nft: Nft!
+#     nftId: BigInt!
+#     nftAmount: BigInt!
+
+#     matcher: Bytes!
+# }
+
+####
+# Fills - one or more fills make up a swap
+####
+
+enum Erc20FillType {
+    LimitOrder
+    RfqOrder
+    OtcOrder
+    BridgeOrder
+    PlugableLiquidityProvider
+    OptimizedUniswapV2
+    OptimizedSushiSwap
+    OptimizedPancakeSwap
+    OptimizedUniswapV3
+}
+
+type Erc20Fill @entity {
+    "txn hash + log index"
+    id: Bytes!
+
+    blockNumber: BigInt!
+    timestamp: BigInt!
+
+    transaction: Transaction!
+    logIndex: BigInt!
+
+    type: Erc20FillType!
+
+    "Account which is asking for the trade, this is maker for native orders, and the swapper for AMMs"
+    trader: Account!
+    "Account which is filling the trade, this is the taker in native order, or the liquidity pool in AMMs"
+    filler: Account!
+
+    "Input token to the fill, this is the maker token for native orders"
+    inputToken: Erc20Token!
+    "Output token being filled, this is the taker token for native orders"
+    outputToken: Erc20Token!
+
+    "Amount of input tokens in the fill"
+    inputTokenAmount: BigInt!
+    "Amount of output tokens in the fill"
+    outputTokenAmount: BigInt!
+
+    "Exchange rate from input to output tokens (outputTokenAmount / inputTokenAmount)"
+    # exchangeRate: BigDecimal!
+
+    # Optional fee payed with the fill
+    feeRecipient: Account!
+    "Fee recipient amount in output tokens"
+    feeRecipientAmount: BigInt!
+    "Protocol fee paid in output tokens"
+    protocolFeeAmount: BigInt!
+
+    "Optional extra data, this is used to store the order hash + pool for native orders, and pool info for bridge orders"
+    extraData: Bytes
 }

@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: ZeroExProxy
-    network: optimism
+    network: mainnet
     source:
       abi: ZeroExProxy
-      address: "0xdef1abe32c034e558cdd535791643c58a13acc10"
-      startBlock: 1451368
+      address: "0xdef1c0ded9bec7f1a1670819833240f027b25eff"
+      startBlock: 10247094
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -35,11 +35,11 @@ dataSources:
       file: ./src/mappings/zeroExProxy.ts
   - kind: ethereum
     name: FlashWallet
-    network: optimism
+    network: mainnet
     source:
       abi: FlashWallet
-      address: "0xa3128d9b7cca7d5af29780a56abeec12b05a6740"
-      startBlock: 1451423
+      address: "0x22f9dcf4647084d6c31b2765f6910cd85c178c18"
+      startBlock: 10286653
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -54,11 +54,11 @@ dataSources:
       file: ./src/mappings/flashWallet.ts
   - kind: ethereum
     name: UniswapV2Factory
-    network: optimism
+    network: mainnet
     source:
       abi: UniswapV2FactoryLike
-      address: "0x0000000000000000000000000000000000000000"
-      startBlock: 0
+      address: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
+      startBlock: 10000835
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -69,15 +69,15 @@ dataSources:
           file: ./abis/UniswapV2FactoryLike.json
       eventHandlers:
         - event: PairCreated(indexed address,indexed address,address,uint256)
-          handler: handlePairCreated
+          handler: handleUniswapV2PairCreated
       file: ./src/mappings/uniswapV2Like.ts
   - kind: ethereum
     name: SushiSwapFactory
-    network: optimism
+    network: mainnet
     source:
       abi: UniswapV2FactoryLike
-      address: "0x0000000000000000000000000000000000000000"
-      startBlock: 0
+      address: "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac"
+      startBlock: 10794229
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -88,15 +88,15 @@ dataSources:
           file: ./abis/UniswapV2FactoryLike.json
       eventHandlers:
         - event: PairCreated(indexed address,indexed address,address,uint256)
-          handler: handlePairCreated
+          handler: handleSushiSwapPairCreated
       file: ./src/mappings/uniswapV2Like.ts
   - kind: ethereum
     name: PancakeSwapFactory
-    network: optimism
+    network: mainnet
     source:
       abi: UniswapV2FactoryLike
-      address: "0x0000000000000000000000000000000000000000"
-      startBlock: 0
+      address: "0x1097053Fd2ea711dad45caCcc45EfF7548fCB362"
+      startBlock: 15614590
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -107,15 +107,15 @@ dataSources:
           file: ./abis/UniswapV2FactoryLike.json
       eventHandlers:
         - event: PairCreated(indexed address,indexed address,address,uint256)
-          handler: handlePairCreated
+          handler: handlePancakeSwapPairCreated
       file: ./src/mappings/uniswapV2Like.ts
   - kind: ethereum
     name: UniswapV3Factory
-    network: optimism
+    network: mainnet
     source:
       abi: UniswapV3Factory
       address: "0x1F98431c8aD98523631AE4a59f267346ea31F984"
-      startBlock: 0
+      startBlock: 12369621
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -131,7 +131,7 @@ dataSources:
 templates:
   - kind: ethereum
     name: UniswapV2PairLike
-    network: optimism
+    network: mainnet
     source:
       abi: UniswapV2PairLike
     mapping:
@@ -148,7 +148,7 @@ templates:
       file: ./src/mappings/uniswapV2Like.ts
   - kind: ethereum
     name: UniswapV3Pool
-    network: optimism
+    network: mainnet
     source:
       abi: UniswapV3Pool
     mapping:
