@@ -11,9 +11,9 @@
         "deploy-hosted:optimism": "source .env; graph deploy --node https://api.thegraph.com/deploy/ papercliplabs/0x-protocol-optimism --access-token $HOSTED_ACCESS_TOKEN",
         "deploy-studio:optimism": "source .env; graph deploy --studio 0x-protocol-optimism --deploy-key $STUDIO_DEPLOY_KEY",
         "auto-deploy:optimism": "yarn codegen; yarn build:optimism; yarn deploy-hosted:optimism; yarn deploy-studio:optimism --version-label $1",
-        "create-local": "source .env; graph create --node http://${LOCAL_NODE_IP}:8020/ 0x-protocol-mainnet",
-        "remove-local": "source .env; graph remove --node http://${LOCAL_NODE_IP}:8020/ 0x-protocol-mainnet",
-        "deploy-local": "source .env; graph deploy --node http://${LOCAL_NODE_IP}:8020/ --ipfs http://${LOCAL_NODE_IP}:5001 0x-protocol-mainnet",
+        "create-local": "source .env; graph create --node http://${LOCAL_NODE_IP}:8020/ papercliplabs/0x-protocol-mainnet-no-optimized",
+        "remove-local": "source .env; graph remove --node http://${LOCAL_NODE_IP}:8020/ papercliplabs/0x-protocol-mainnet-no-optimized",
+        "deploy-local": "source .env; graph deploy --node http://${LOCAL_NODE_IP}:8020/ --ipfs http://${LOCAL_NODE_IP}:5001 papercliplabs/0x-protocol-mainnet-no-optimized",
         "test": "graph test"
     },
     "dependencies": {

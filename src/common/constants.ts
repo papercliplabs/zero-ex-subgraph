@@ -1,6 +1,8 @@
-import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt, ByteArray, crypto } from "@graphprotocol/graph-ts";
 
 export const ZERO_ADDRESS = Address.fromString("0x0000000000000000000000000000000000000000");
+
+export const ETH_ADDRESS = Address.fromString("0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"); // 0x uses this for ETH
 
 export const DAYS_PER_YEAR: BigInt = BigInt.fromString("365");
 export const SECONDS_PER_HOUR: BigInt = BigInt.fromString("3600");
@@ -26,3 +28,5 @@ export namespace Erc20FillType {
     export const OptimizedPancakeSwap = "OptimizedPancakeSwap";
     export const OptimizedUniswapV3 = "OptimizedUniswapV3";
 }
+
+export const TRANSFER_EVENT_SIGNATURE = crypto.keccak256(ByteArray.fromUTF8("Transfer(address,address,uint256)"));

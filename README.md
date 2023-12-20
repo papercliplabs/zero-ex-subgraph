@@ -2,6 +2,29 @@
 
 0x Protocol community subgraph. These subgraphs contain comprehensive data on the 0x protocol on all networks.
 
+## Table of Contents
+
+- [0x Protocol Community Subgraph](#0x-protocol-community-subgraph)
+	- [Table of Contents](#table-of-contents)
+	- [Subgraph Deployments](#subgraph-deployments)
+	- [Usage Notes](#usage-notes)
+	- [Block Diagrams](#block-diagrams)
+		- [Order Types and Events](#order-types-and-events)
+		- [Contract Contexts](#contract-contexts)
+		- [Contract Source Spawning](#contract-source-spawning)
+		- [Multiplex](#multiplex)
+			- [BatchSell](#batchsell)
+			- [MultiHopSell](#multihopsell)
+		- [Token Flows](#token-flows)
+			- [NativeOrder](#nativeorder)
+			- [OptimizedSwap](#optimizedswap)
+			- [Transform Erc20](#transform-erc20)
+			- [Plugable Liquidity Provider](#plugable-liquidity-provider)
+	- [Development](#development)
+		- [Contract Addresses](#contract-addresses)
+	- [Validation](#validation)
+
+
 ## Subgraph Deployments
 
 | Blockchain Network | The Graph Hosted                                                                                   | The Graph Decentralized | Alchemy |
@@ -69,6 +92,126 @@ erDiagram
     UniswapV3Factory ||--|{ UniswapV3Pool : "PoolCreated"
 ```
 
+### Multiplex
+
+Multiplex allows composition of all order types:
+
+```solidity
+enum MultiplexSubcall {
+    Invalid,
+    RFQ,
+    OTC,
+    UniswapV2,
+    UniswapV3,
+    LiquidityProvider,
+    TransformERC20,
+    BatchSell,
+    MultiHopSell
+}
+```
+
+#### BatchSell
+
+```mermaid
+graph TD
+  	S[Source] --> Subcall1
+	S --> Subcall2
+	S --> SubcallN
+	Subcall1 --> R[Recipient]
+	Subcall2 --> R
+	SubcallN --> R
+```
+
+#### MultiHopSell
+
+```mermaid
+graph TD
+  	S[Source] --> Subcall1
+	Subcall1 --> Subcall2
+	Subcall2 --> SubcallN
+	SubcallN --> R[Recipient]
+```
+
+> Note that BatchSell and MultiHopSell can be composed within each other, offering even more flexibility. I.e a subcall of batch could be a multihop and visa versa.
+
+### Token Flows
+
+#### NativeOrder
+
+Note: OTC is the only one that supports filling in ETH directly, others can through transforms
+
+```mermaid
+graph TD
+	subgraph A[ZeroExProxy as payer, supports ERC20 + ETH]
+		T[Taker] --ETH or ERC20--> Z[ZeroExProxy]
+		Z --ETH or ERC20--> M[Maker]
+		M --ETH or ERC20--> R[Receipient]
+	end
+	subgraph B[Taker as payer, supports ERC20 only]
+		TB[Taker] --ERC20--> MB[Maker]
+		MB--ERC20--> RB[Receipient]
+	end
+```
+
+#### OptimizedSwap
+
+```mermaid
+graph TD
+	subgraph ETH output
+		SB[sender] --(1) ERC20--> PB[Pools]
+		PB --(2) ERC20--> PB
+		PB --(3) WETH--> ZB[ZeroExProxy]
+		ZB[ZeroExProxy] <--(4) WETH/ETH--> WB[WETH]
+		ZB --(5) ETH--> SB
+	end
+	subgraph ETH input
+		SA[sender] --(1) ETH--> ZA[ZeroExProxy]
+		ZA <--(2) ETH / WETH--> WA[WETH]
+		ZA --(3) WETH--> PA[Pools]
+		PA --(4) ERC20--> PA
+		PA --(5) ERC20--> SA
+	end
+	subgraph ERC20 input and output
+		SC[sender] --(1) ERC20--> PC[Pools]
+		PC --(2) ERC20--> PC
+		PC --(3) ETH--> SC
+	end
+```
+
+#### Transform Erc20
+
+```mermaid
+graph TD
+	U[Sender] --(1, using proxy as payer) ETH or ERC20--> P[ZeroExProxy]
+  P --(1, using proxy as payer) ETH or ERC20--> F[FlashWallet]
+	U --(1, using sender as payer) ERC20--> F
+	F <--(2: FillQuoteTransformer->fillBridge) ETH or ERC20--> B[Bridge]
+	F <--(2: FillQuoteTransformer->NativeOrder) ETH or ERC20--> NativeOrderMaker
+	F <--(2: WethTransformer) WETH / ETH--> W[WETH]
+	F --(3: AffiliateFeeTransformer)----> FeeRecipient
+	F --(3: PayTakerTransformer) ETH or ERC20----> Recipient
+```
+
+#### Plugable Liquidity Provider
+
+```mermaid
+graph TD
+	subgraph B[ETH output]
+		SB[Sender] --ERC20--> BB[Provider]
+		BB --ETH--> RB[Receipient]
+	end
+	subgraph A[ETH input]
+		SA[Sender] --ETH--> ZA[ZeroExProxy]
+		ZA --ETH--> BA[PlpSandbox]
+		BA --ETH--> PA[Provider]
+		PA --ERC20--> RA[Receipient]
+	end
+	subgraph C[ERC20 input and output]
+		SC[Sender] --ERC20--> BC[Provider]
+		BC --ERC20--> RC[Receipient]
+	end
+```
+
 ## Development
 
 Install dependencies
@@ -133,6 +276,16 @@ Supported networks (for <network> tag):
 
 -   mainnet
 -   optimism
+
+Local mainnet development
+
+```
+# Create subgraph (only need first time)
+yarn create-local
+
+# Deploy
+yarn deploy-local
+```
 
 ### Contract Addresses
 

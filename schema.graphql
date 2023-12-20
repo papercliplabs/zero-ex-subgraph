@@ -8,14 +8,14 @@ type Transaction @entity {
     "Transaction hash"
     hash: Bytes!
     "Block number this transaction is part of"
-    blockNumber: Bytes!
+    blockNumber: BigInt!
     "Timestamp of this transaction in UTC"
     timestamp: BigInt!
 
     "Address the transaction is from"
     from: Bytes!
     "Address the transaction is to"
-    to: Bytes!
+    to: Bytes
 
     "Gas limit for the transaction"
     gasLimit: BigInt!
@@ -27,9 +27,26 @@ type Transaction @entity {
     # gasUsedUsd: BigDecimal
 
     # Counts for filtering
+    erc20FillCount: Int!
+    erc20TransferCount: Int!
+
+    erc20Transfers: [Erc20Transfer!]!
 
     # Derived
     erc20Fills: [Erc20Fill!]! @derivedFrom(field: "transaction")
+}
+
+type Erc20Transfer @entity(immutable: true) {
+    "txn hash + log index"
+    id: Bytes!
+
+    transaction: Transaction!
+    logIndex: BigInt!
+    token: Erc20Token!
+
+    from: Account!
+    to: Account!
+    amount: BigInt!
 }
 
 type Account @entity {
@@ -131,7 +148,7 @@ enum Erc20FillType {
     OptimizedUniswapV3
 }
 
-type Erc20Fill @entity {
+type Erc20Fill @entity(immutable: true) {
     "txn hash + log index"
     id: Bytes!
 
@@ -143,10 +160,12 @@ type Erc20Fill @entity {
 
     type: Erc20FillType!
 
-    "Account which is asking for the trade, this is maker for native orders, and the swapper for AMMs"
-    trader: Account!
+    "Account which is the source of input tokens, this is the maker for native order and the swapper for AMMs"
+    source: Account!
     "Account which is filling the trade, this is the taker in native order, or the liquidity pool in AMMs"
     filler: Account!
+    "Account which is receiving the output tokens from the filler, this is the maker in native orders"
+    destination: Account!
 
     "Input token to the fill, this is the maker token for native orders"
     inputToken: Erc20Token!
@@ -169,5 +188,5 @@ type Erc20Fill @entity {
     protocolFeeAmount: BigInt!
 
     "Optional extra data, this is used to store the order hash + pool for native orders, and pool info for bridge orders"
-    extraData: Bytes
+    extraData: String
 }
