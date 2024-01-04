@@ -45,13 +45,8 @@ export function handleSwap(event: SwapEvent): void {
             event
         );
 
-        // If where we can't find the input transfer and the input asset is WETH, we have an ETH call chain with wrapping: sender -> proxy + wrap ETH -> pool
-        // In this case, the sender is txn.from
-        const sender = inputTransfer
-            ? Address.fromBytes(inputTransfer.from)
-            : getWrappedNativeAssetAddress().equals(inputTokenAddress)
-            ? event.transaction.from
-            : ZERO_ADDRESS; // If all else fails, leave empty...
+        // From 0x, all transfers into the pools for optimized swaps will be in ERC20 tokens only (wraps / unwraps happen in zeroExProxy). So, this should never fail to find the sender
+        const sender = inputTransfer ? Address.fromBytes(inputTransfer.from) : ZERO_ADDRESS; // If all else fails, leave empty...
 
         createErc20Fill(
             Erc20FillType.OptimizedUniswapV3,

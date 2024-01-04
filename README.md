@@ -21,6 +21,7 @@
 			- [Transform Erc20](#transform-erc20)
 			- [Plugable Liquidity Provider](#plugable-liquidity-provider)
 	- [Development](#development)
+		- [Grafting](#grafting)
 		- [Contract Addresses](#contract-addresses)
 	- [Validation](#validation)
 
@@ -34,7 +35,11 @@
 
 ## Usage Notes
 
--   TODO
+-   One limitation of subgraphs is the inability to track native asset transfers (ETH) in internal calls. This means we cannot accurately do accounting of complex swaps which use ETH during or at the end of the swap. 
+-   We try our best to infer the sender, filler and recipient for each fill when they are not provided by an event, but sometimes it is not possible. This occurs for example, in cases where:
+    -   An ERC20 doesn't emit Transfer event
+	-   During LiquidityProviderSwap when the input token is ETH
+	-   During BridgeFills when the input token is ETH, and the output token gets minted (for example, ETH -> cETHv3)
 
 ## Block Diagrams
 
@@ -287,6 +292,16 @@ yarn create-local
 yarn deploy-local
 ```
 
+### Grafting
+
+```
+features:
+  - grafting # feature name
+graft:
+  base: Qm... # subgraph ID of base subgraph
+  block: 1502122 # block number
+```
+
 ### Contract Addresses
 
 -   0x addresses: https://github.com/0xProject/protocol/blob/development/packages/contract-addresses/addresses.json
@@ -294,6 +309,7 @@ yarn deploy-local
 -   SushiSwap: https://docs.sushi.com/docs/Products/Classic%20AMM/Deployment%20Addresses
 -   PancakeSwap: https://docs.pancakeswap.finance/developers/smart-contracts/pancakeswap-exchange/v2-contracts/factory-v2
 -   UniswapV3: https://docs.uniswap.org/contracts/v3/reference/deployments
+-   Chainlink price feeds: https://docs.chain.link/data-feeds/price-feeds/addresses?network=base&page=1&search=ETH+%2F+USD
 
 ## Validation
 

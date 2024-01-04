@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, ByteArray, crypto } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt, ByteArray, Bytes, crypto } from "@graphprotocol/graph-ts";
 
 export const ZERO_ADDRESS = Address.fromString("0x0000000000000000000000000000000000000000");
 
@@ -29,4 +29,17 @@ export namespace Erc20FillType {
     export const OptimizedUniswapV3 = "OptimizedUniswapV3";
 }
 
+export namespace Erc20FillRole {
+    export const Source = "Source";
+    export const Filler = "Filler";
+    export const Destination = "Destination";
+}
+
+export namespace UniqueUserUsageId {
+    export const Protocol = Bytes.fromI32(0);
+    export const Erc20FillSummary = Bytes.fromI32(1);
+}
+
 export const TRANSFER_EVENT_SIGNATURE = crypto.keccak256(ByteArray.fromUTF8("Transfer(address,address,uint256)"));
+
+export const CHAINLINK_PRICE_FEED_FACTOR = BigDecimal.fromString("100000000"); // 10^8

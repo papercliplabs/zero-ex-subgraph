@@ -1,6 +1,7 @@
-import { Address, BigInt, ethereum, log } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt, Bytes, ethereum, log } from "@graphprotocol/graph-ts";
 import { getErc20TransfersForTransaction, getOrCreateTransaction } from "../entityHelpers/transaction";
-import { Erc20Transfer } from "../../generated/schema";
+import { Erc20Transfer, _ActiveUser } from "../../generated/schema";
+import { ZERO_BD } from "./constants";
 
 export function findMatchingErc20Transfer(
     tokenAddress: Address,
@@ -45,4 +46,62 @@ export function findMatchingErc20Transfer(
     //     ]);
     // }
     return foundTransfer;
+}
+
+/**
+ * Divides a value by a given exponent of base 10 (10^exponent), and formats it as a BigDecimal
+ * @param value value to be divided
+ * @param exponent exponent to apply
+ * @returns value / (10^exponent)
+ */
+export function formatUnits(value: BigInt, exponent: u32): BigDecimal {
+    const powerTerm = BigInt.fromU32(10)
+        .pow(u8(exponent))
+        .toBigDecimal();
+    return value.toBigDecimal().div(powerTerm);
+}
+
+/**
+ * Multiply value by a given exponent of base 10 (10^exponent), and formats it as a BigInt
+ * @param value value to be multiplied
+ * @param exponent exponent to apply
+ * @returns value * 10^exponent
+ */
+export function parseUnits(value: BigDecimal, exponent: u32): BigInt {
+    const powerTerm = BigInt.fromU32(10)
+        .pow(u8(exponent))
+        .toBigDecimal();
+    return BigInt.fromString(
+        value
+            .times(powerTerm)
+            .truncate(0)
+            .toString()
+    );
+}
+
+export function bigDecimalSafeDiv(num: BigDecimal, den: BigDecimal): BigDecimal {
+    if (den.equals(ZERO_BD)) {
+        return ZERO_BD;
+    } else {
+        return num.div(den);
+    }
+}
+
+export function bigIntMin(a: BigInt, b: BigInt): BigInt {
+    return a.lt(b) ? a : b;
+}
+
+export function bigIntMax(a: BigInt, b: BigInt): BigInt {
+    return a.gt(b) ? a : b;
+}
+
+/**
+ * Helper to determine is a user is unique for a given qualifier period
+ * @param address address of the user
+ * @param uniqueUserUsageId UniqueUserUsageId
+ * @returns true if the address is unique given the qualifier
+ */
+export function isUniqueUser(address: Address, uniqueUserUsageId: Bytes): boolean {
+    const id = address.concat(uniqueUserUsageId);
+    return _ActiveUser.load(id) == null;
 }

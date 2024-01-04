@@ -1,60 +1,64 @@
 ####
-# Foundation
+# Protocol
 ####
 
-type Transaction @entity {
-    "Transaction hash"
+type Protocol @entity {
+    "Hardcoded 0"
     id: Bytes!
-    "Transaction hash"
-    hash: Bytes!
-    "Block number this transaction is part of"
-    blockNumber: BigInt!
-    "Timestamp of this transaction in UTC"
-    timestamp: BigInt!
 
-    "Address the transaction is from"
-    from: Bytes!
-    "Address the transaction is to"
-    to: Bytes
-
-    "Gas limit for the transaction"
-    gasLimit: BigInt!
-    "Gas price for the transaction"
-    gasPrice: BigInt!
-    "Amount of gas used - optional since not all graph node versions support"
-    gasUsed: BigInt
-    # "Amount of gas used in USD - optional since not all graph node versions support"
-    # gasUsedUsd: BigDecimal
-
-    # Counts for filtering
-    erc20FillCount: Int!
-    erc20TransferCount: Int!
-
-    erc20Transfers: [Erc20Transfer!]!
+    metrics: ProtocolMetrics!
 
     # Derived
-    erc20Fills: [Erc20Fill!]! @derivedFrom(field: "transaction")
 }
 
-type Erc20Transfer @entity(immutable: true) {
-    "txn hash + log index"
+type ProtocolMetrics @entity {
+    "protocol ID + time qualifier"
     id: Bytes!
 
-    transaction: Transaction!
-    logIndex: BigInt!
-    token: Erc20Token!
+    erc20FillVolumeUsd: BigDecimal!
+    erc20FillCount: BigInt!
 
-    from: Account!
-    to: Account!
-    amount: BigInt!
+    uniqueUserCount: BigInt!
 }
+
+####
+# Account
+####
 
 type Account @entity {
     "Address"
     id: Bytes!
     "Account address"
     address: Bytes!
+
+    metrics: AccountMetrics!
+
+    # Derived
+    erc20SourceFills: [Erc20Fill!]! @derivedFrom(field: "source")
+    erc20FillerFills: [Erc20Fill!]! @derivedFrom(field: "filler")
+    erc20DestinationFills: [Erc20Fill!]! @derivedFrom(field: "destination")
 }
+
+type AccountMetrics @entity {
+    id: Bytes!
+
+    erc20FillSourceVolumeUsd: BigDecimal!
+    erc20FillFillerVolumeUsd: BigDecimal!
+    erc20FillDestinationVolumeUsd: BigDecimal!
+
+    erc20FillSourceCount: BigInt!
+    erc20FillFillerCount: BigInt!
+    erc20FillDestinationCount: BigInt!
+}
+
+type _ActiveUser @entity {
+    "Address + usecase specific metadata, this is just a helper for tracking overall usage"
+    id: Bytes!
+}
+
+####
+# ERC20 Token
+####
 
 type Erc20Token @entity {
     "Token address"
@@ -67,74 +71,72 @@ type Erc20Token @entity {
     symbol: String!
     "Token decimals"
     decimals: Int!
+
+    "Current metrics"
+    metrics: Erc20TokenMetrics!
+    lastUpdatedBlock: BigInt!
+    lastDerivedPriceBlock: BigInt!
+
+    # Derived
+    inputTokenFills: [Erc20Fill!]! @derivedFrom(field: "inputToken")
+    outputTokenFills: [Erc20Fill!]! @derivedFrom(field: "outputToken")
+    pairsA: [Erc20TokenPair!]! @derivedFrom(field: "tokenA")
+    pairsB: [Erc20TokenPair!]! @derivedFrom(field: "tokenB")
 }
 
-type Nft @entity {
+type Erc20TokenMetrics @entity {
+    "TokenId + time qualifier"
     id: Bytes!
 
-    address: Bytes!
+    token: Erc20Token!
 
-    name: String
+    erc20FillInputVolume: BigInt!
+    erc20FillOutputVolume: BigInt!
+
+    erc20FillInputVolumeUsd: BigDecimal!
+    erc20FillOutputVolumeUsd: BigDecimal!
+
+    erc20InputFillCount: BigInt!
+    erc20OutputFillCount: BigInt!
+
+    derivedPriceInEth: BigDecimal!
+    derivedPriceInUsd: BigDecimal!
 }
 
-####
-# Swaps
-####
+type Erc20TokenPair @entity {
+    "tokenA address + tokenB address, note that tokens A is the one with the lowest address to ensure two tokens only have 1 Erc20TokenPair"
+    id: Bytes!
 
-# type Swap @entity {
-#     id: Bytes!
+    "Token A in the pair"
+    tokenA: Erc20Token!
+    "Token B in the pair"
+    tokenB: Erc20Token!
 
-#     trader: Account!
-#     filler: Account!
+    "Current metrics"
+    metrics: Erc20TokenPairMetrics!
+    lastUpdatedBlock: BigInt!
 
-#     "Input token to the fill, this is the maker token for native orders"
-#     inputToken: Erc20Token!
-#     "Output token being filled, this is the taker token for native orders"
-#     outputToken: Erc20Token!
+    # Derived
+    fills: [Erc20Fill!]! @derivedFrom(field: "tokenPair")
+}
 
-#     "Amount of input tokens in the fill"
-#     inputTokenAmount: BigInt!
-#     "Amount of output tokens in the fill"
-#     outputTokenAmount: BigInt!
+type Erc20TokenPairMetrics @entity {
+    "pairId + time qualifier"
+    id: Bytes!
 
-#     fills: [Erc20Fill!]!
-# }
+    "Volume of tokenA traded to tokenB for the time period"
+    volumeAtoB: BigInt!
+    "Volume of tokenB traded to tokenA for the time period"
+    volumeBtoA: BigInt!
 
-# enum NativeNftOrderType {
-#     Erc721
-#     Erc1155
-# }
+    fillCountAtoB: BigInt!
+    fillCountBtoA: BigInt!
 
-# enum NativeNftOrderDir {
-#     Sell
-#     Buy
-# }
-
-# type NftOrderFill @entity {
-#     id: Bytes!
-#     transaction: Transaction!
-
-#     type: NativeNftOrderType!
-#     direction: NativeNftOrderDir!
-
-#     maker: Account!
-#     taker: Account!
-
-#     nonce: BigInt!
-
-#     erc20Token: Erc20Token!
-#     erc20TokenAmount: BigInt!
-
-#     nft: Nft!
-#     nftId: BigInt!
-#     nftAmount: BigInt!
-
-#     matcher: Bytes!
-# }
-
-####
-# Fills - one or more fills make up a swap
-####
+    "Exchange rate (a.k.a price) from tokenA to tokenB, i.e tokenAAmount * 10^(tokenADecimals) * exchangeRateAtoB = tokenB equivalent"
+    exchangeRateAtoB: BigDecimal!
+    "Exchange rate (a.k.a price) from tokenB to tokenA, i.e tokenBAmount * 10^(tokenBDecimals) * exchangeRateBtoA = tokenA equivalent"
+    exchangeRateBtoA: BigDecimal!
+}
 
 enum Erc20FillType {
     LimitOrder
@@ -177,9 +179,6 @@ type Erc20Fill @entity(immutable: true) {
     "Amount of output tokens in the fill"
     outputTokenAmount: BigInt!
 
-    "Exchange rate from input to output tokens (outputTokenAmount / inputTokenAmount)"
-    # exchangeRate: BigDecimal!
-
     # Optional fee payed with the fill
     feeRecipient: Account!
     "Fee recipient amount in output tokens"
@@ -189,4 +188,94 @@ type Erc20Fill @entity(immutable: true) {
 
     "Optional extra data, this is used to store the order hash + pool for native orders, and pool info for bridge orders"
     extraData: String
+
+    tokenPair: Erc20TokenPair!
 }
+
+type Erc20FillTypeSummary @entity(immutable: true) {
+    id: Bytes!
+
+    type: Erc20FillType!
+
+    metrics: Erc20FillTypeSummaryMetrics!
+
+    # Derived
+}
+
+type Erc20FillTypeSummaryMetrics @entity {
+    id: Bytes!
+
+    fillVolumeUsd: BigDecimal!
+    fillCount: BigInt!
+    uniqueUsers: BigInt!
+}
+
+####
+# NFT - TODO
+####
+
+type Nft @entity {
+    id: Bytes!
+
+    address: Bytes!
+
+    name: String
+}
+
+type NftFill @entity {
+    id: Bytes!
+}
+
+####
+# Transaction
+####
+
+type Transaction @entity {
+    "Transaction hash"
+    id: Bytes!
+    "Transaction hash"
+    hash: Bytes!
+    "Block number this transaction is part of"
+    blockNumber: BigInt!
+    "Timestamp of this transaction in UTC"
+    timestamp: BigInt!
+
+    "Address the transaction is from"
+    from: Bytes!
+    "Address the transaction is to"
+    to: Bytes
+
+    "Gas limit for the transaction"
+    gasLimit: BigInt!
+    "Gas price for the transaction"
+    gasPrice: BigInt!
+    "Amount of gas used - optional since not all graph node versions support"
+    gasUsed: BigInt
+
+    # Counts for filtering
+    erc20FillCount: Int!
+    erc20TransferCount: Int!
+
+    erc20Transfers: [Erc20Transfer!]!
+
+    # Derived
+    erc20Fills: [Erc20Fill!]! @derivedFrom(field: "transaction")
+}
+
+# Helper to derive sender and receiver where events are missing data, and also help reconstruct entire trades
+type Erc20Transfer @entity(immutable: true) {
+    "txn hash + log index"
+    id: Bytes!
+
+    transaction: Transaction!
+    logIndex: BigInt!
+    token: Erc20Token!
+
+    from: Account!
+    to: Account!
+    amount: BigInt!
+}
+
+####
+# Historical Snapshots
+####

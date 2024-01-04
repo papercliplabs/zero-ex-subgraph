@@ -4,7 +4,7 @@ import {
     UniswapV2PairLike as UniswapV2FactoryLikeContract,
 } from "../../generated/templates/UniswapV2PairLike/UniswapV2PairLike";
 import { Address, DataSourceContext, dataSource, log } from "@graphprotocol/graph-ts";
-import { Erc20FillType, ZERO_ADDRESS, ZERO_BI } from "../common/constants";
+import { ETH_ADDRESS, Erc20FillType, ZERO_ADDRESS, ZERO_BI } from "../common/constants";
 import { createErc20Fill } from "../entityHelpers/erc20Fill";
 import { findMatchingErc20Transfer } from "../common/utils";
 import { getWrappedNativeAssetAddress } from "../common/networkSpecific";
@@ -70,13 +70,8 @@ export function handleSwap(event: SwapEvent): void {
             event
         );
 
-        // If where we can't find the input transfer and the input asset is WETH, we have an ETH call chain with wrapping: sender -> proxy + wrap ETH -> pool
-        // In this case, the sender is txn.from
-        const sender = inputTransfer
-            ? Address.fromBytes(inputTransfer.from)
-            : getWrappedNativeAssetAddress().equals(inputTokenAddress)
-            ? event.transaction.from
-            : ZERO_ADDRESS; // If all else fails, leave empty...
+        // From 0x, all transfers into the pools for optimized swaps will be in ERC20 tokens only (wraps / unwraps happen in zeroExProxy). So, this should never fail to find the sender
+        const sender = inputTransfer ? Address.fromBytes(inputTransfer.from) : ZERO_ADDRESS; // If all else fails, leave empty...
 
         createErc20Fill(
             fillType,

@@ -43,15 +43,12 @@ export function handleLiquidityProviderSwap(event: LiquidityProviderSwapEvent): 
         event
     );
 
-    const inputIsEth = ETH_ADDRESS.equals(event.params.inputToken);
-
-    // When the input token is ETH, we have a call chain that forwards the ETH: sender -> zeroExProxy -> Provider
-    // In this case, we know that the sender needed to be the txn from address
-    const sender = inputIsEth
-        ? event.transaction.from
-        : inputTransfer
-        ? Address.fromBytes(inputTransfer.from)
-        : ZERO_ADDRESS; // If all else fails, leave empty...
+    // When the input token is ETH, the inputTransfer will not exist
+    // We could use event.transaction.from in the case but that is not always accurate
+    // For example with metamask router it goes: initial_sender -> metamask_router -> zeroExProxy -> Provider,
+    // the "sender" from the perspective of the fill is the metamask router, but event.transaction.from gives us the initial_sender.
+    // Instead, we will leave as zero address when we can't determine it
+    const sender = inputTransfer ? Address.fromBytes(inputTransfer.from) : ZERO_ADDRESS;
 
     createErc20Fill(
         Erc20FillType.PlugableLiquidityProvider,
@@ -69,7 +66,7 @@ export function handleLiquidityProviderSwap(event: LiquidityProviderSwapEvent): 
         event
     );
 
-    if (ZERO_ADDRESS.equals(sender)) {
+    if (ZERO_ADDRESS.equals(sender) && ETH_ADDRESS.notEqual(event.params.inputToken)) {
         log.warning("Unable to find sender for zeroExProxy.handleLiquidityProviderSwap: {} - {}", [
             event.transaction.hash.toHexString(),
             event.logIndex.toString(),
