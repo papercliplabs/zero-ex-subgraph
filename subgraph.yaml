@@ -19,6 +19,10 @@ dataSources:
           file: ./abis/ZeroExProxy.json
         - name: Erc20
           file: ./abis/Erc20.json
+        - name: Erc721
+          file: ./abis/Erc721.json
+        - name: Erc1155
+          file: ./abis/Erc1155.json
         - name: ChainlinkPriceFeed
           file: ./abis/ChainlinkPriceFeed.json
       eventHandlers:

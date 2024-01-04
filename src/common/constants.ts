@@ -40,6 +40,18 @@ export namespace UniqueUserUsageId {
     export const Erc20FillSummary = Bytes.fromI32(1);
 }
 
+export namespace NftCollectionType {
+    export const Erc721 = "Erc721";
+    export const Erc1155 = "Erc1155";
+}
+
+export namespace NftFillDirection {
+    export const Sell = "Sell";
+    export const Buy = "Buy";
+}
+
 export const TRANSFER_EVENT_SIGNATURE = crypto.keccak256(ByteArray.fromUTF8("Transfer(address,address,uint256)"));
 
 export const CHAINLINK_PRICE_FEED_FACTOR = BigDecimal.fromString("100000000"); // 10^8
+
+export const ERC1155_INTERFACE_ID = Bytes.fromHexString("0xd9b67a26");

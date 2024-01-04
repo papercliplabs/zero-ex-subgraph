@@ -18,6 +18,8 @@ type ProtocolMetrics @entity {
     erc20FillVolumeUsd: BigDecimal!
     erc20FillCount: BigInt!
 
+    nftFillCount: BigInt! # TODO
+    nftFillErc20VolumeUsd: BigDecimal! # TODO
     uniqueUserCount: BigInt!
 }
 
@@ -98,6 +100,10 @@ type Erc20TokenMetrics @entity {
 
     erc20InputFillCount: BigInt!
     erc20OutputFillCount: BigInt!
+
+    nftFillVolume: BigInt!
+    nftFillVolumeUsd: BigDecimal!
+    nftFillCount: BigInt!
 
     derivedPriceInEth: BigDecimal!
     derivedPriceInUsd: BigDecimal!
@@ -211,19 +217,79 @@ type Erc20FillTypeSummaryMetrics @entity {
 }
 
 ####
-# NFT - TODO
+# NFT
 ####
 
-type Nft @entity {
+enum NftCollectionType {
+    Erc721
+    Erc1155
+}
+
+type NftCollection @entity {
+    "Address"
     id: Bytes!
+
+    type: NftCollectionType!
 
     address: Bytes!
 
+    # Some ERC721 don't support and ERC1155 doesn't support these
     name: String
+    symbol: String
+
+    metrics: NftCollectionMetrics!
+
+    # Derived
+    nfts: [Nft!]! @derivedFrom(field: "collection")
+    fills: [NftFill!]! @derivedFrom(field: "collection")
+}
+
+type NftCollectionMetrics @entity {
+    id: Bytes!
+
+    fillCount: BigInt!
+    erc20VolumeUsd: BigDecimal!
+    averageFillPriceUsd: BigDecimal!
+}
+
+type Nft @entity {
+    "Collection address + tokenId"
+    id: Bytes!
+
+    collection: NftCollection!
+
+    tokenId: BigInt!
+    tokenUri: String
+
+    # Derived
+    fills: [NftFill!]! @derivedFrom(field: "nft")
+}
+
+enum NftFillDirection {
+    SELL
+    BUY
 }
 
 type NftFill @entity {
     id: Bytes!
+
+    blockNumber: BigInt!
+    timestamp: BigInt!
+
+    transaction: Transaction!
+    logIndex: BigInt!
+
+    type: NftCollectionType!
+    direction: NftFillDirection!
+
+    maker: Account!
+    taker: Account!
+
+    collection: NftCollection!
+    nft: Nft!
+
+    erc20Token: Erc20Token!
+    erc20TokenAmount: BigInt!
 }
 
 ####
@@ -260,6 +326,7 @@ type Transaction @entity {
 
     # Derived
     erc20Fills: [Erc20Fill!]! @derivedFrom(field: "transaction")
+    nftFills: [NftFill!]! @derivedFrom(field: "transaction")
 }
 
 # Helper to derive sender and receiver where events are missing data, and also help reconstruct entire trades

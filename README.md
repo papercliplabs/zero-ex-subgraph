@@ -40,6 +40,8 @@
     -   An ERC20 doesn't emit Transfer event
 	-   During LiquidityProviderSwap when the input token is ETH
 	-   During BridgeFills when the input token is ETH, and the output token gets minted (for example, ETH -> cETHv3)
+- TODO: add note about how derived prices work
+- TODO: add a note about assembling full swaps
 
 ## Block Diagrams
 
@@ -219,6 +221,8 @@ graph TD
 
 ## Development
 
+> Any <network> below is to be replaced with one of the supported networks: `[mainnet, optimism]`
+
 Install dependencies
 
 ```
@@ -241,30 +245,18 @@ Build
 
 ```
 yarn build:<network>
-
-# Examples
-yarn build:mainnet
-yarn build:optimism
 ```
 
 Deploy to the hosted network
 
 ```
 yarn deploy-hosted:<network>
-
-# Examples
-yarn deploy-hosted:mainnet
-yarn deploy-hosted:optimism
 ```
 
 Deploy to the subgraph studio
 
 ```
 yarn deploy-studio:<network>
-
-# Examples
-yarn deploy-studio:mainnet
-yarn deploy-studio:optimism
 ```
 
 Codegen, build and deploy everywhere in one command
@@ -272,15 +264,9 @@ Codegen, build and deploy everywhere in one command
 ```
 yarn auto-deploy:<network> v<version (X.Y.Z)>
 
-# Examples
+# Example
 yarn auto-deploy:mainnet v0.0.2
-yarn auto-deploy:optimism v0.0.1
 ```
-
-Supported networks (for <network> tag):
-
--   mainnet
--   optimism
 
 Local mainnet development
 

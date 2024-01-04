@@ -52,6 +52,10 @@ export function getOrCreateErc20Token(address: Address, event: ethereum.Event): 
         metrics.erc20InputFillCount = ZERO_BI;
         metrics.erc20OutputFillCount = ZERO_BI;
 
+        metrics.nftFillVolume = ZERO_BI;
+        metrics.nftFillVolumeUsd = ZERO_BD;
+        metrics.nftFillCount = ZERO_BI;
+
         metrics.derivedPriceInEth = ZERO_BD;
         metrics.derivedPriceInUsd = ZERO_BD;
 
@@ -79,7 +83,7 @@ export function updateErc20TokenMetricsForErc20FillAndGetDerivedFillAmountUsd(
     // Update derived ETH prices - before updating usd values
     updateErc20TokenDerivedEthPrice(token, metrics, event);
 
-    const fillAmountUsd = formatUnits(metrics.erc20FillInputVolume, token.decimals).times(metrics.derivedPriceInUsd);
+    const fillAmountUsd = formatUnits(fillAmount, token.decimals).times(metrics.derivedPriceInUsd);
 
     if (isInput) {
         metrics.erc20FillInputVolume = metrics.erc20FillInputVolume.plus(fillAmount);
@@ -155,6 +159,31 @@ function updateErc20TokenDerivedEthPrice(token: Erc20Token, metrics: Erc20TokenM
 
         token.lastDerivedPriceBlock = maxBlock;
     }
+}
+
+export function updateErc20TokenMetricsForNftFillAndGetDerivedFillAmountUsd(
+    address: Address,
+    fillAmount: BigInt,
+    event: ethereum.Event
+): BigDecimal {
+    const token = getOrCreateErc20Token(address, event);
+    const metrics = Erc20TokenMetrics.load(token.id)!; // Guaranteed to exist
+
+    // Update derived ETH prices - before updating usd values
+    updateErc20TokenDerivedEthPrice(token, metrics, event);
+
+    const fillAmountUsd = formatUnits(fillAmount, token.decimals).times(metrics.derivedPriceInUsd);
+
+    metrics.nftFillVolume = metrics.nftFillVolume.plus(fillAmount);
+    metrics.nftFillVolumeUsd = metrics.nftFillVolumeUsd.plus(fillAmountUsd);
+    metrics.nftFillCount = metrics.nftFillCount.plus(ONE_BI);
+
+    metrics.save();
+
+    // Create snapshots
+    createErc20TokenMetricsSnapshotsIfNecessary(metrics, event);
+
+    return fillAmountUsd;
 }
 
 function createErc20TokenMetricsSnapshotsIfNecessary(metrics: Erc20TokenMetrics, event: ethereum.Event): void {

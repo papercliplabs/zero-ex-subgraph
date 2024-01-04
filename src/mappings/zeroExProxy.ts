@@ -7,14 +7,39 @@ import {
     RfqOrderFilled as RfqOrderFilledEvent,
     TransformedERC20 as TransformedERC20Event,
 } from "../../generated/ZeroExProxy/ZeroExProxy";
-import { ETH_ADDRESS, Erc20FillType, ZERO_ADDRESS, ZERO_BI } from "../common/constants";
+import { ETH_ADDRESS, Erc20FillType, NftCollectionType, ZERO_ADDRESS, ZERO_BI } from "../common/constants";
 import { createErc20Fill } from "../entityHelpers/erc20Fill";
 import { findMatchingErc20Transfer } from "../common/utils";
 import { Address, log } from "@graphprotocol/graph-ts";
+import { createNftFill } from "../entityHelpers/nftFill";
 
-export function handleERC1155OrderFilled(event: ERC1155OrderFilledEvent): void {}
+export function handleERC1155OrderFilled(event: ERC1155OrderFilledEvent): void {
+    createNftFill(
+        NftCollectionType.Erc1155,
+        event.params.direction,
+        event.params.maker,
+        event.params.taker,
+        event.params.erc1155Token,
+        event.params.erc1155TokenId,
+        event.params.erc20Token,
+        event.params.erc20FillAmount,
+        event
+    );
+}
 
-export function handleERC721OrderFilled(event: ERC721OrderFilledEvent): void {}
+export function handleERC721OrderFilled(event: ERC721OrderFilledEvent): void {
+    createNftFill(
+        NftCollectionType.Erc721,
+        event.params.direction,
+        event.params.maker,
+        event.params.taker,
+        event.params.erc721Token,
+        event.params.erc721TokenId,
+        event.params.erc20Token,
+        event.params.erc20TokenAmount,
+        event
+    );
+}
 
 export function handleLimitOrderFilled(event: LimitOrderFilledEvent): void {
     createErc20Fill(
