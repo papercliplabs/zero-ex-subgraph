@@ -1,7 +1,8 @@
 import { Address, BigDecimal, ethereum, log } from "@graphprotocol/graph-ts";
-import { NftCollection, NftCollectionMetrics } from "../../generated/schema";
+import { NftCollection, NftCollectionData } from "../../generated/schema";
 import { NftCollectionType, ONE_BI, ZERO_BD, ZERO_BI } from "../common/constants";
 import { Erc721 as Erc721Contract } from "../../generated/ZeroExProxy/Erc721";
+import { getOrCreateProtocol } from "./protocol";
 
 // type is NftCollectionType
 export function getOrCreateNftCollection(
@@ -13,6 +14,8 @@ export function getOrCreateNftCollection(
 
     if (!collection) {
         collection = new NftCollection(collectionAddress);
+
+        collection._protocol = getOrCreateProtocol(event).id;
 
         collection.type = type;
         collection.address = collectionAddress;
@@ -31,13 +34,13 @@ export function getOrCreateNftCollection(
             log.error("getOrCreateNftCollection: unsupported type - {}", [type]);
         }
 
-        const metrics = new NftCollectionMetrics(collectionAddress);
-        metrics.fillCount = ZERO_BI;
-        metrics.erc20VolumeUsd = ZERO_BD;
-        metrics.averageFillPriceUsd = ZERO_BD;
-        metrics.save();
+        const data = new NftCollectionData(collectionAddress);
+        data.fillCount = ZERO_BI;
+        data.erc20VolumeUsd = ZERO_BD;
+        data.averageFillPriceUsd = ZERO_BD;
+        data.save();
 
-        collection.metrics = metrics.id;
+        collection.data = data.id;
 
         collection.save();
     }
@@ -45,25 +48,25 @@ export function getOrCreateNftCollection(
     return collection;
 }
 
-export function updateNftCollectionMetricsForNftFill(
+export function updateNftCollectionDataForNftFill(
     collectionAddress: Address,
     type: string,
     erc20FillAmountUsd: BigDecimal,
     event: ethereum.Event
 ): void {
     const collection = getOrCreateNftCollection(collectionAddress, type, event);
-    const metrics = NftCollectionMetrics.load(collection.id)!; // Guaranteed to exist
+    const data = NftCollectionData.load(collection.id)!; // Guaranteed to exist
 
-    metrics.fillCount = metrics.fillCount.plus(ONE_BI);
-    metrics.erc20VolumeUsd = metrics.erc20VolumeUsd.plus(erc20FillAmountUsd);
-    metrics.averageFillPriceUsd = metrics.erc20VolumeUsd.div(metrics.fillCount.toBigDecimal()); // Denom can't be 0 (incremented above)
+    data.fillCount = data.fillCount.plus(ONE_BI);
+    data.erc20VolumeUsd = data.erc20VolumeUsd.plus(erc20FillAmountUsd);
+    data.averageFillPriceUsd = data.erc20VolumeUsd.div(data.fillCount.toBigDecimal()); // Denom can't be 0 (incremented above)
 
-    metrics.save();
+    data.save();
 
     // Create snapshots
-    createNftCollectionMetricsSnapshotsIfNecessary(metrics, event);
+    createNftCollectionDataSnapshotsIfNecessary(data, event);
 }
 
-function createNftCollectionMetricsSnapshotsIfNecessary(metrics: NftCollectionMetrics, event: ethereum.Event): void {
+function createNftCollectionDataSnapshotsIfNecessary(data: NftCollectionData, event: ethereum.Event): void {
     // TODO
 }

@@ -4,10 +4,9 @@ import {
     UniswapV2PairLike as UniswapV2FactoryLikeContract,
 } from "../../generated/templates/UniswapV2PairLike/UniswapV2PairLike";
 import { Address, DataSourceContext, dataSource, log } from "@graphprotocol/graph-ts";
-import { ETH_ADDRESS, Erc20FillType, ZERO_ADDRESS, ZERO_BI } from "../common/constants";
+import { EXCLUDE_OPTIMIZED_SWAPS, Erc20FillType, ZERO_ADDRESS, ZERO_BI } from "../common/constants";
 import { createErc20Fill } from "../entityHelpers/erc20Fill";
 import { findMatchingErc20Transfer } from "../common/utils";
-import { getWrappedNativeAssetAddress } from "../common/networkSpecific";
 import { UniswapV2PairLike } from "../../generated/templates";
 
 export function handleUniswapV2PairCreated(event: PairCreatedEvent): void {
@@ -15,8 +14,9 @@ export function handleUniswapV2PairCreated(event: PairCreatedEvent): void {
     let context = new DataSourceContext();
     context.setString("fillType", Erc20FillType.OptimizedUniswapV2);
 
-    // TODO: undo comment below, just for optimized indexing
-    // UniswapV2PairLike.createWithContext(event.params.pair, context);
+    if (!EXCLUDE_OPTIMIZED_SWAPS) {
+        UniswapV2PairLike.createWithContext(event.params.pair, context);
+    }
 }
 
 export function handleSushiSwapPairCreated(event: PairCreatedEvent): void {
@@ -24,8 +24,9 @@ export function handleSushiSwapPairCreated(event: PairCreatedEvent): void {
     let context = new DataSourceContext();
     context.setString("fillType", Erc20FillType.OptimizedSushiSwap);
 
-    // TODO: undo comment below, just for optimized indexing
-    // UniswapV2PairLike.createWithContext(event.params.pair, context);
+    if (!EXCLUDE_OPTIMIZED_SWAPS) {
+        UniswapV2PairLike.createWithContext(event.params.pair, context);
+    }
 }
 
 export function handlePancakeSwapPairCreated(event: PairCreatedEvent): void {
@@ -33,8 +34,9 @@ export function handlePancakeSwapPairCreated(event: PairCreatedEvent): void {
     let context = new DataSourceContext();
     context.setString("fillType", Erc20FillType.OptimizedPancakeSwap);
 
-    // TODO: undo comment below, just for optimized indexing
-    // UniswapV2PairLike.createWithContext(event.params.pair, context);
+    if (!EXCLUDE_OPTIMIZED_SWAPS) {
+        UniswapV2PairLike.createWithContext(event.params.pair, context);
+    }
 }
 
 const ZERO_EX_PROXY_ADDRESS = Address.fromString("0xdef1c0ded9bec7f1a1670819833240f027b25eff");

@@ -1,5 +1,5 @@
 import { ethereum, Address, log, BigInt, BigDecimal } from "@graphprotocol/graph-ts";
-import { Erc20Token, Erc20TokenMetrics, Erc20TokenPairMetrics } from "../../generated/schema";
+import { Erc20Token, Erc20TokenData, Erc20TokenPairData } from "../../generated/schema";
 import { Erc20 as Erc20Contract } from "../../generated/FlashWallet/Erc20";
 import { ChainlinkPriceFeed as ChainlinkPriceFeedContract } from "../../generated/FlashWallet/ChainlinkPriceFeed";
 import { CHAINLINK_PRICE_FEED_FACTOR, ETH_ADDRESS, ONE_BD, ONE_BI, ZERO_BD, ZERO_BI } from "../common/constants";
@@ -10,13 +10,16 @@ import {
 } from "../common/networkSpecific";
 import { getOrCreateErc20TokenPair } from "./erc20TokenPair";
 import { bigIntMin, formatUnits } from "../common/utils";
-import { updateProtocolMetricsForErc20Fill } from "./protocol";
+import { getOrCreateProtocol } from "./protocol";
 
 export function getOrCreateErc20Token(address: Address, event: ethereum.Event): Erc20Token {
     let token = Erc20Token.load(address);
 
     if (!token) {
         token = new Erc20Token(address);
+
+        token._protocol = getOrCreateProtocol(event).id;
+
         token.address = address;
 
         // 0x uses special address to native ETH
@@ -40,28 +43,28 @@ export function getOrCreateErc20Token(address: Address, event: ethereum.Event): 
             }
         }
 
-        const metrics = new Erc20TokenMetrics(address);
-        metrics.token = token.id;
+        const data = new Erc20TokenData(address);
+        data.token = token.id;
 
-        metrics.erc20FillInputVolume = ZERO_BI;
-        metrics.erc20FillOutputVolume = ZERO_BI;
+        data.erc20FillInputVolume = ZERO_BI;
+        data.erc20FillOutputVolume = ZERO_BI;
 
-        metrics.erc20FillInputVolumeUsd = ZERO_BD;
-        metrics.erc20FillOutputVolumeUsd = ZERO_BD;
+        data.erc20FillInputVolumeUsd = ZERO_BD;
+        data.erc20FillOutputVolumeUsd = ZERO_BD;
 
-        metrics.erc20InputFillCount = ZERO_BI;
-        metrics.erc20OutputFillCount = ZERO_BI;
+        data.erc20InputFillCount = ZERO_BI;
+        data.erc20OutputFillCount = ZERO_BI;
 
-        metrics.nftFillVolume = ZERO_BI;
-        metrics.nftFillVolumeUsd = ZERO_BD;
-        metrics.nftFillCount = ZERO_BI;
+        data.nftFillVolume = ZERO_BI;
+        data.nftFillVolumeUsd = ZERO_BD;
+        data.nftFillCount = ZERO_BI;
 
-        metrics.derivedPriceInEth = ZERO_BD;
-        metrics.derivedPriceInUsd = ZERO_BD;
+        data.derivedPriceInEth = ZERO_BD;
+        data.derivedPriceInUsd = ZERO_BD;
 
-        metrics.save();
+        data.save();
 
-        token.metrics = metrics.id;
+        token.data = data.id;
         token.lastUpdatedBlock = event.block.number;
         token.lastDerivedPriceBlock = ZERO_BI;
 
@@ -71,42 +74,42 @@ export function getOrCreateErc20Token(address: Address, event: ethereum.Event): 
     return token;
 }
 
-export function updateErc20TokenMetricsForErc20FillAndGetDerivedFillAmountUsd(
+export function updateErc20TokenDataForErc20FillAndGetDerivedFillAmountUsd(
     address: Address,
     fillAmount: BigInt,
     isInput: boolean,
     event: ethereum.Event
 ): BigDecimal {
     const token = getOrCreateErc20Token(address, event);
-    const metrics = Erc20TokenMetrics.load(token.id)!; // Guaranteed to exist
+    const data = Erc20TokenData.load(token.id)!; // Guaranteed to exist
 
     // Update derived ETH prices - before updating usd values
-    updateErc20TokenDerivedEthPrice(token, metrics, event);
+    updateErc20TokenDerivedEthPrice(token, data, event);
 
-    const fillAmountUsd = formatUnits(fillAmount, token.decimals).times(metrics.derivedPriceInUsd);
+    const fillAmountUsd = formatUnits(fillAmount, token.decimals).times(data.derivedPriceInUsd);
 
     if (isInput) {
-        metrics.erc20FillInputVolume = metrics.erc20FillInputVolume.plus(fillAmount);
-        metrics.erc20FillInputVolumeUsd = fillAmountUsd;
-        metrics.erc20InputFillCount = metrics.erc20InputFillCount.plus(ONE_BI);
+        data.erc20FillInputVolume = data.erc20FillInputVolume.plus(fillAmount);
+        data.erc20FillInputVolumeUsd = data.erc20FillInputVolumeUsd.plus(fillAmountUsd);
+        data.erc20InputFillCount = data.erc20InputFillCount.plus(ONE_BI);
     } else {
-        metrics.erc20FillOutputVolume = metrics.erc20FillOutputVolume.plus(fillAmount);
-        metrics.erc20FillOutputVolumeUsd = fillAmountUsd;
-        metrics.erc20OutputFillCount = metrics.erc20OutputFillCount.plus(ONE_BI);
+        data.erc20FillOutputVolume = data.erc20FillOutputVolume.plus(fillAmount);
+        data.erc20FillOutputVolumeUsd = data.erc20FillOutputVolumeUsd.plus(fillAmountUsd);
+        data.erc20OutputFillCount = data.erc20OutputFillCount.plus(ONE_BI);
     }
 
     token.lastUpdatedBlock = event.block.number;
 
-    metrics.save();
+    data.save();
     token.save();
 
     // Create snapshots
-    createErc20TokenMetricsSnapshotsIfNecessary(metrics, event);
+    createErc20TokenDataSnapshotsIfNecessary(data, event);
 
     return fillAmountUsd;
 }
 
-function updateErc20TokenDerivedEthPrice(token: Erc20Token, metrics: Erc20TokenMetrics, event: ethereum.Event): void {
+function updateErc20TokenDerivedEthPrice(token: Erc20Token, data: Erc20TokenData, event: ethereum.Event): void {
     const tokenAddressWhitelist = getTokenAddressWhitelist();
 
     let maxBlockWhitelistToken = getOrCreateErc20Token(tokenAddressWhitelist[0], event); // Initial placeholder only
@@ -117,7 +120,7 @@ function updateErc20TokenDerivedEthPrice(token: Erc20Token, metrics: Erc20TokenM
         Address.fromBytes(token.address).equals(getWrappedNativeAssetAddress())
     ) {
         // It is ETH or WETH, set to 1 and put as this block
-        metrics.derivedPriceInEth = ONE_BD;
+        data.derivedPriceInEth = ONE_BD;
         token.lastDerivedPriceBlock = event.block.number;
     } else {
         for (let i = 0; i < tokenAddressWhitelist.length; i++) {
@@ -143,49 +146,49 @@ function updateErc20TokenDerivedEthPrice(token: Erc20Token, metrics: Erc20TokenM
             Address.fromBytes(maxBlockWhitelistToken.address),
             event
         );
-        const maxBlockPairMetrics = Erc20TokenPairMetrics.load(maxBlockPair.id)!; // Guaranteed to exist;
-        const maxBlockWhitelistTokenMetrics = Erc20TokenMetrics.load(maxBlockWhitelistToken.id)!; // Guaranteed to exist
-        metrics.derivedPriceInEth = maxBlockWhitelistTokenMetrics.derivedPriceInEth.times(
+        const maxBlockPairData = Erc20TokenPairData.load(maxBlockPair.id)!; // Guaranteed to exist;
+        const maxBlockWhitelistTokenData = Erc20TokenData.load(maxBlockWhitelistToken.id)!; // Guaranteed to exist
+        data.derivedPriceInEth = maxBlockWhitelistTokenData.derivedPriceInEth.times(
             Address.fromBytes(maxBlockPair.tokenA).equals(maxBlockWhitelistToken.address)
-                ? maxBlockPairMetrics.exchangeRateBtoA
-                : maxBlockPairMetrics.exchangeRateAtoB
+                ? maxBlockPairData.exchangeRateBtoA
+                : maxBlockPairData.exchangeRateAtoB
         );
-
-        // Fetch ETH -> USD conversion from chainlink price feed
-        const ethToUsdPriceFeedContract = ChainlinkPriceFeedContract.bind(getChainlinkEthToUsdPriceFeedAddress());
-        const latestRoundData = ethToUsdPriceFeedContract.latestRoundData();
-        const ethToUsdPrice = latestRoundData.value1.toBigDecimal().div(CHAINLINK_PRICE_FEED_FACTOR);
-        metrics.derivedPriceInUsd = metrics.derivedPriceInEth.times(ethToUsdPrice);
 
         token.lastDerivedPriceBlock = maxBlock;
     }
+
+    // Fetch ETH -> USD conversion from chainlink price feed
+    const ethToUsdPriceFeedContract = ChainlinkPriceFeedContract.bind(getChainlinkEthToUsdPriceFeedAddress());
+    const latestRoundData = ethToUsdPriceFeedContract.latestRoundData();
+    const ethToUsdPrice = latestRoundData.value1.toBigDecimal().div(CHAINLINK_PRICE_FEED_FACTOR);
+    data.derivedPriceInUsd = data.derivedPriceInEth.times(ethToUsdPrice);
 }
 
-export function updateErc20TokenMetricsForNftFillAndGetDerivedFillAmountUsd(
+export function updateErc20TokenDataForNftFillAndGetDerivedFillAmountUsd(
     address: Address,
     fillAmount: BigInt,
     event: ethereum.Event
 ): BigDecimal {
     const token = getOrCreateErc20Token(address, event);
-    const metrics = Erc20TokenMetrics.load(token.id)!; // Guaranteed to exist
+    const data = Erc20TokenData.load(token.id)!; // Guaranteed to exist
 
     // Update derived ETH prices - before updating usd values
-    updateErc20TokenDerivedEthPrice(token, metrics, event);
+    updateErc20TokenDerivedEthPrice(token, data, event);
 
-    const fillAmountUsd = formatUnits(fillAmount, token.decimals).times(metrics.derivedPriceInUsd);
+    const fillAmountUsd = formatUnits(fillAmount, token.decimals).times(data.derivedPriceInUsd);
 
-    metrics.nftFillVolume = metrics.nftFillVolume.plus(fillAmount);
-    metrics.nftFillVolumeUsd = metrics.nftFillVolumeUsd.plus(fillAmountUsd);
-    metrics.nftFillCount = metrics.nftFillCount.plus(ONE_BI);
+    data.nftFillVolume = data.nftFillVolume.plus(fillAmount);
+    data.nftFillVolumeUsd = data.nftFillVolumeUsd.plus(fillAmountUsd);
+    data.nftFillCount = data.nftFillCount.plus(ONE_BI);
 
-    metrics.save();
+    data.save();
 
     // Create snapshots
-    createErc20TokenMetricsSnapshotsIfNecessary(metrics, event);
+    createErc20TokenDataSnapshotsIfNecessary(data, event);
 
     return fillAmountUsd;
 }
 
-function createErc20TokenMetricsSnapshotsIfNecessary(metrics: Erc20TokenMetrics, event: ethereum.Event): void {
+function createErc20TokenDataSnapshotsIfNecessary(data: Erc20TokenData, event: ethereum.Event): void {
     // TODO
 }

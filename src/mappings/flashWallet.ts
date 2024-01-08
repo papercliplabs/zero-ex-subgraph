@@ -1,9 +1,9 @@
-import { Address, Bytes, log } from "@graphprotocol/graph-ts";
+import { Address, log } from "@graphprotocol/graph-ts";
 import { BridgeFill as BridgeFillEvent } from "../../generated/FlashWallet/FlashWallet";
 import { ETH_ADDRESS, Erc20FillType, ZERO_ADDRESS, ZERO_BI } from "../common/constants";
 import { createErc20Fill } from "../entityHelpers/erc20Fill";
 import { findMatchingErc20Transfer } from "../common/utils";
-import { getFlashWalletAddress, getWrappedNativeAssetAddress, getZeroExProxyAddress } from "../common/networkSpecific";
+import { getFlashWalletAddress } from "../common/networkSpecific";
 
 export function handleBridgeFill(event: BridgeFillEvent): void {
     // token flow goes: flash wallet -> filler -> flash wallet

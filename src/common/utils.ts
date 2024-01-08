@@ -1,4 +1,4 @@
-import { Address, BigDecimal, BigInt, Bytes, ethereum, log } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
 import { getErc20TransfersForTransaction, getOrCreateTransaction } from "../entityHelpers/transaction";
 import { Erc20Transfer, _ActiveUser } from "../../generated/schema";
 import { ZERO_BD } from "./constants";
@@ -103,5 +103,14 @@ export function bigIntMax(a: BigInt, b: BigInt): BigInt {
  */
 export function isUniqueUser(address: Address, uniqueUserUsageId: Bytes): boolean {
     const id = address.concat(uniqueUserUsageId);
-    return _ActiveUser.load(id) == null;
+
+    let activeUser = _ActiveUser.load(id);
+
+    if (!activeUser) {
+        activeUser = new _ActiveUser(id);
+        activeUser.save();
+        return true;
+    } else {
+        return false;
+    }
 }

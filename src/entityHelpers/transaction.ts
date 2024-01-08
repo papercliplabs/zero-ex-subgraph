@@ -1,6 +1,7 @@
 import { Bytes, ethereum } from "@graphprotocol/graph-ts";
 import { Erc20Transfer, Transaction } from "../../generated/schema";
 import { createErc20TransfersFromReceipt } from "./erc20Transfer";
+import { getOrCreateProtocol } from "./protocol";
 
 export function getOrCreateTransaction(event: ethereum.Event): Transaction {
     const id = event.transaction.hash;
@@ -8,6 +9,8 @@ export function getOrCreateTransaction(event: ethereum.Event): Transaction {
 
     if (!transaction) {
         transaction = new Transaction(id);
+
+        transaction._protocol = getOrCreateProtocol(event).id;
 
         transaction.hash = event.transaction.hash;
         transaction.blockNumber = event.block.number;
@@ -20,6 +23,7 @@ export function getOrCreateTransaction(event: ethereum.Event): Transaction {
         transaction.gasPrice = event.transaction.gasPrice;
 
         transaction.erc20FillCount = 0;
+        transaction.nftFillCount = 0;
 
         if (event.receipt) {
             transaction.gasUsed = event.receipt!.gasUsed;

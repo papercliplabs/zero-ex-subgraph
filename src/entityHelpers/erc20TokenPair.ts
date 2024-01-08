@@ -1,8 +1,9 @@
-import { Address, BigInt, Bytes, ethereum, log } from "@graphprotocol/graph-ts";
-import { Erc20TokenPair, Erc20TokenPairMetrics } from "../../generated/schema";
+import { Address, BigInt, ethereum, log } from "@graphprotocol/graph-ts";
+import { Erc20TokenPair, Erc20TokenPairData } from "../../generated/schema";
 import { getOrCreateErc20Token } from "./erc20Token";
 import { ONE_BD, ONE_BI, ZERO_BD, ZERO_BI } from "../common/constants";
 import { bigDecimalSafeDiv, formatUnits } from "../common/utils";
+import { getOrCreateProtocol } from "./protocol";
 
 export function getOrCreateErc20TokenPair(
     token0Address: Address,
@@ -24,22 +25,24 @@ export function getOrCreateErc20TokenPair(
     if (!pair) {
         pair = new Erc20TokenPair(id);
 
+        pair._protocol = getOrCreateProtocol(event).id;
+
         pair.tokenA = getOrCreateErc20Token(tokenAAddress, event).id;
         pair.tokenB = getOrCreateErc20Token(tokenBAddress, event).id;
 
-        const metrics = new Erc20TokenPairMetrics(id);
+        const data = new Erc20TokenPairData(id);
 
-        metrics.volumeAtoB = ZERO_BI;
-        metrics.volumeBtoA = ZERO_BI;
+        data.volumeAtoB = ZERO_BI;
+        data.volumeBtoA = ZERO_BI;
 
-        metrics.fillCountAtoB = ZERO_BI;
-        metrics.fillCountBtoA = ZERO_BI;
+        data.fillCountAtoB = ZERO_BI;
+        data.fillCountBtoA = ZERO_BI;
 
-        metrics.exchangeRateAtoB = ZERO_BD;
-        metrics.exchangeRateBtoA = ZERO_BD;
-        metrics.save();
+        data.exchangeRateAtoB = ZERO_BD;
+        data.exchangeRateBtoA = ZERO_BD;
+        data.save();
 
-        pair.metrics = metrics.id;
+        pair.data = data.id;
         pair.lastUpdatedBlock = event.block.number;
 
         pair.save();
@@ -48,7 +51,7 @@ export function getOrCreateErc20TokenPair(
     return pair;
 }
 
-export function updateErc20TokenPairMetrics(
+export function updateErc20TokenPairData(
     inputTokenAddress: Address,
     inputTokenAmount: BigInt,
     outputTokenAddress: Address,
@@ -56,7 +59,7 @@ export function updateErc20TokenPairMetrics(
     event: ethereum.Event
 ): void {
     const pair = getOrCreateErc20TokenPair(inputTokenAddress, outputTokenAddress, event);
-    const metrics = Erc20TokenPairMetrics.load(pair.metrics)!; // Guaranteed to exist
+    const data = Erc20TokenPairData.load(pair.data)!; // Guaranteed to exist
     const inputToken = getOrCreateErc20Token(inputTokenAddress, event);
     const outputToken = getOrCreateErc20Token(outputTokenAddress, event);
 
@@ -67,28 +70,28 @@ export function updateErc20TokenPairMetrics(
     const exchangeRateOutputToInput = bigDecimalSafeDiv(ONE_BD, exchangeRateInputToOutput);
 
     if (Address.fromBytes(pair.tokenA).equals(inputTokenAddress)) {
-        metrics.volumeAtoB = metrics.volumeAtoB.plus(inputTokenAmount);
-        metrics.fillCountAtoB = metrics.fillCountAtoB.plus(ONE_BI);
+        data.volumeAtoB = data.volumeAtoB.plus(inputTokenAmount);
+        data.fillCountAtoB = data.fillCountAtoB.plus(ONE_BI);
 
-        metrics.exchangeRateAtoB = exchangeRateInputToOutput;
-        metrics.exchangeRateBtoA = exchangeRateOutputToInput;
+        data.exchangeRateAtoB = exchangeRateInputToOutput;
+        data.exchangeRateBtoA = exchangeRateOutputToInput;
     } else {
-        metrics.volumeBtoA = metrics.volumeBtoA.plus(inputTokenAmount);
-        metrics.fillCountBtoA = metrics.fillCountAtoB.plus(ONE_BI);
+        data.volumeBtoA = data.volumeBtoA.plus(inputTokenAmount);
+        data.fillCountBtoA = data.fillCountBtoA.plus(ONE_BI);
 
-        metrics.exchangeRateBtoA = exchangeRateInputToOutput;
-        metrics.exchangeRateAtoB = exchangeRateOutputToInput;
+        data.exchangeRateBtoA = exchangeRateInputToOutput;
+        data.exchangeRateAtoB = exchangeRateOutputToInput;
     }
 
     pair.lastUpdatedBlock = event.block.number;
 
-    metrics.save();
+    data.save();
     pair.save();
 
     // Create snapshots
-    createErc20PairMetricsSnapshotsIfNecessary(metrics, event);
+    createErc20PairDataSnapshotsIfNecessary(data, event);
 }
 
-function createErc20PairMetricsSnapshotsIfNecessary(metrics: Erc20TokenPairMetrics, event: ethereum.Event): void {
+function createErc20PairDataSnapshotsIfNecessary(data: Erc20TokenPairData, event: ethereum.Event): void {
     // TODO
 }

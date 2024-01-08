@@ -1,9 +1,9 @@
-import { Address, BigDecimal, ByteArray, Bytes, ethereum } from "@graphprotocol/graph-ts";
-import { Protocol, ProtocolMetrics, _ActiveUser } from "../../generated/schema";
+import { BigDecimal, Bytes, ethereum } from "@graphprotocol/graph-ts";
+import { Protocol, ProtocolData, _ActiveUser } from "../../generated/schema";
 import { ONE_BI, UniqueUserUsageId, ZERO_BD, ZERO_BI } from "../common/constants";
 import { isUniqueUser } from "../common/utils";
 
-const PROTOCOL_ID = Bytes.fromHexString("0x0");
+const PROTOCOL_ID = Bytes.fromHexString("0x00");
 
 export function getOrCreateProtocol(event: ethereum.Event): Protocol {
     let protocol = Protocol.load(PROTOCOL_ID);
@@ -11,14 +11,19 @@ export function getOrCreateProtocol(event: ethereum.Event): Protocol {
     if (!protocol) {
         protocol = new Protocol(PROTOCOL_ID);
 
-        const metrics = new ProtocolMetrics(protocol.id);
+        const data = new ProtocolData(protocol.id);
 
-        metrics.erc20FillVolumeUsd = ZERO_BD;
-        metrics.erc20FillCount = ZERO_BI;
+        data.erc20FillVolumeUsd = ZERO_BD;
+        data.erc20FillCount = ZERO_BI;
 
-        metrics.save();
+        data.nftFillErc20VolumeUsd = ZERO_BD;
+        data.nftFillCount = ZERO_BI;
 
-        protocol.metrics = metrics.id;
+        data.uniqueUserCount = ZERO_BI;
+
+        data.save();
+
+        protocol.data = data.id;
 
         protocol.save();
     }
@@ -26,23 +31,39 @@ export function getOrCreateProtocol(event: ethereum.Event): Protocol {
     return protocol;
 }
 
-export function updateProtocolMetricsForErc20Fill(fillAmountUsd: BigDecimal, event: ethereum.Event): void {
+export function updateProtocolDataForErc20Fill(fillAmountUsd: BigDecimal, event: ethereum.Event): void {
     const protocol = getOrCreateProtocol(event);
-    const metrics = ProtocolMetrics.load(protocol.id)!; // Guaranteed to exist
+    const data = ProtocolData.load(protocol.id)!; // Guaranteed to exist
 
-    metrics.erc20FillVolumeUsd = metrics.erc20FillVolumeUsd.plus(fillAmountUsd);
+    data.erc20FillVolumeUsd = data.erc20FillVolumeUsd.plus(fillAmountUsd);
 
-    metrics.erc20FillCount = metrics.erc20FillCount.plus(ONE_BI);
+    data.erc20FillCount = data.erc20FillCount.plus(ONE_BI);
 
     if (isUniqueUser(event.transaction.from, UniqueUserUsageId.Protocol)) {
-        metrics.uniqueUserCount = metrics.uniqueUserCount.plus(ONE_BI);
+        data.uniqueUserCount = data.uniqueUserCount.plus(ONE_BI);
     }
 
-    metrics.save();
+    data.save();
 
-    createProtocolMetricsSnapshotsIfNecessary(metrics, event);
+    createProtocolDataSnapshotsIfNecessary(data, event);
 }
 
-function createProtocolMetricsSnapshotsIfNecessary(metrics: ProtocolMetrics, event: ethereum.Event): void {
+export function updateProtocolDataForNftFill(fillAmountUsd: BigDecimal, event: ethereum.Event): void {
+    const protocol = getOrCreateProtocol(event);
+    const data = ProtocolData.load(protocol.id)!; // Guaranteed to exist
+
+    data.nftFillErc20VolumeUsd = data.nftFillErc20VolumeUsd.plus(fillAmountUsd);
+    data.nftFillCount = data.nftFillCount.plus(ONE_BI);
+
+    if (isUniqueUser(event.transaction.from, UniqueUserUsageId.Protocol)) {
+        data.uniqueUserCount = data.uniqueUserCount.plus(ONE_BI);
+    }
+
+    data.save();
+
+    createProtocolDataSnapshotsIfNecessary(data, event);
+}
+
+function createProtocolDataSnapshotsIfNecessary(data: ProtocolData, event: ethereum.Event): void {
     // TODO
 }

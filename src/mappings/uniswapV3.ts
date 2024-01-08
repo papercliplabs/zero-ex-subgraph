@@ -4,16 +4,16 @@ import {
     UniswapV3Pool as UniswapV3PoolContract,
 } from "../../generated/templates/UniswapV3Pool/UniswapV3Pool";
 import { Address, log } from "@graphprotocol/graph-ts";
-import { Erc20FillType, ZERO_ADDRESS, ZERO_BI } from "../common/constants";
+import { EXCLUDE_OPTIMIZED_SWAPS, Erc20FillType, ZERO_ADDRESS, ZERO_BI } from "../common/constants";
 import { createErc20Fill } from "../entityHelpers/erc20Fill";
 import { findMatchingErc20Transfer } from "../common/utils";
-import { getWrappedNativeAssetAddress } from "../common/networkSpecific";
 import { UniswapV3Pool } from "../../generated/templates";
 
 export function handlePoolCreated(event: PoolCreatedEvent): void {
     // Spawn dynamic data source
-    // TODO: undo comment below, just for optimized indexing
-    // UniswapV3Pool.create(event.params.pool);
+    if (!EXCLUDE_OPTIMIZED_SWAPS) {
+        UniswapV3Pool.create(event.params.pool);
+    }
 }
 
 const ZERO_EX_PROXY_ADDRESS = Address.fromString("0xdef1c0ded9bec7f1a1670819833240f027b25eff");

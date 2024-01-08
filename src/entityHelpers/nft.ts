@@ -4,6 +4,7 @@ import { getOrCreateNftCollection } from "./nftCollection";
 import { NftCollectionType } from "../common/constants";
 import { Erc721 as Erc721Contract } from "../../generated/ZeroExProxy/Erc721";
 import { Erc1155 as Erc1155Contract } from "../../generated/ZeroExProxy/Erc1155";
+import { getOrCreateProtocol } from "./protocol";
 
 // collectionType is NftCollectionType
 export function getOrCreateNft(
@@ -17,6 +18,8 @@ export function getOrCreateNft(
 
     if (!nft) {
         nft = new Nft(id);
+
+        nft._protocol = getOrCreateProtocol(event).id;
 
         const collection = getOrCreateNftCollection(collectionAddress, collectionType, event);
 

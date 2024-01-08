@@ -6,20 +6,33 @@ type Protocol @entity {
     "Hardcoded 0"
     id: Bytes!
 
-    metrics: ProtocolMetrics!
+    data: ProtocolData!
 
     # Derived
+    accounts: [Account!]! @derivedFrom(field: "_protocol")
+
+    erc20Tokens: [Erc20Token!]! @derivedFrom(field: "_protocol")
+    erc20TokenPairs: [Erc20TokenPair!]! @derivedFrom(field: "_protocol")
+    erc20Fills: [Erc20Fill!]! @derivedFrom(field: "_protocol")
+    erc20FillTypeSummary: [Erc20FillTypeSummary!]! @derivedFrom(field: "_protocol")
+
+    nftCollections: [NftCollection!]! @derivedFrom(field: "_protocol")
+    nfts: [Nft!]! @derivedFrom(field: "_protocol")
+    nftFills: [NftFill!]! @derivedFrom(field: "_protocol")
+
+    transactions: [Transaction!]! @derivedFrom(field: "_protocol")
 }
 
-type ProtocolMetrics @entity {
+type ProtocolData @entity {
     "protocol ID + time qualifier"
     id: Bytes!
 
     erc20FillVolumeUsd: BigDecimal!
     erc20FillCount: BigInt!
 
-    nftFillCount: BigInt! # TODO
-    nftFillErc20VolumeUsd: BigDecimal! # TODO
+    nftFillErc20VolumeUsd: BigDecimal!
+    nftFillCount: BigInt!
+
     uniqueUserCount: BigInt!
 }
 
@@ -30,18 +43,24 @@ type ProtocolMetrics @entity {
 type Account @entity {
     "Address"
     id: Bytes!
+
+    _protocol: Protocol!
+
     "Account address"
     address: Bytes!
 
-    metrics: AccountMetrics!
+    data: AccountData!
 
     # Derived
     erc20SourceFills: [Erc20Fill!]! @derivedFrom(field: "source")
     erc20FillerFills: [Erc20Fill!]! @derivedFrom(field: "filler")
     erc20DestinationFills: [Erc20Fill!]! @derivedFrom(field: "destination")
+
+    nftMakerFills: [NftFill!]! @derivedFrom(field: "maker")
+    nftTakerFills: [NftFill!]! @derivedFrom(field: "taker")
 }
 
-type AccountMetrics @entity {
+type AccountData @entity {
     id: Bytes!
 
     erc20FillSourceVolumeUsd: BigDecimal!
@@ -65,6 +84,9 @@ type _ActiveUser @entity {
 type Erc20Token @entity {
     "Token address"
     id: Bytes!
+
+    _protocol: Protocol!
+
     "Token address"
     address: Bytes!
     "Token name"
@@ -74,19 +96,21 @@ type Erc20Token @entity {
     "Token decimals"
     decimals: Int!
 
-    "Current metrics"
-    metrics: Erc20TokenMetrics!
+    "Current data"
+    data: Erc20TokenData!
     lastUpdatedBlock: BigInt!
     lastDerivedPriceBlock: BigInt!
 
     # Derived
-    inputTokenFills: [Erc20Fill!]! @derivedFrom(field: "inputToken")
-    outputTokenFills: [Erc20Fill!]! @derivedFrom(field: "outputToken")
+    erc20InputTokenFills: [Erc20Fill!]! @derivedFrom(field: "inputToken")
+    erc20OutputTokenFills: [Erc20Fill!]! @derivedFrom(field: "outputToken")
     pairsA: [Erc20TokenPair!]! @derivedFrom(field: "tokenA")
     pairsB: [Erc20TokenPair!]! @derivedFrom(field: "tokenB")
+
+    nftFills: [NftFill!]! @derivedFrom(field: "erc20Token")
 }
 
-type Erc20TokenMetrics @entity {
+type Erc20TokenData @entity {
     "TokenId + time qualifier"
     id: Bytes!
 
@@ -113,20 +137,22 @@ type Erc20TokenPair @entity {
     "tokenA address + tokenB address, note that tokens A is the one with the lowest address to ensure two tokens only have 1 Erc20TokenPair"
     id: Bytes!
 
+    _protocol: Protocol!
+
     "Token A in the pair"
     tokenA: Erc20Token!
     "Token B in the pair"
     tokenB: Erc20Token!
 
-    "Current metrics"
-    metrics: Erc20TokenPairMetrics!
+    "Current data"
+    data: Erc20TokenPairData!
     lastUpdatedBlock: BigInt!
 
     # Derived
     fills: [Erc20Fill!]! @derivedFrom(field: "tokenPair")
 }
 
-type Erc20TokenPairMetrics @entity {
+type Erc20TokenPairData @entity {
     "pairId + time qualifier"
     id: Bytes!
 
@@ -160,6 +186,8 @@ type Erc20Fill @entity(immutable: true) {
     "txn hash + log index"
     id: Bytes!
 
+    _protocol: Protocol!
+
     blockNumber: BigInt!
     timestamp: BigInt!
 
@@ -167,6 +195,7 @@ type Erc20Fill @entity(immutable: true) {
     logIndex: BigInt!
 
     type: Erc20FillType!
+    _fillTypeSummary: Erc20FillTypeSummary!
 
     "Account which is the source of input tokens, this is the maker for native order and the swapper for AMMs"
     source: Account!
@@ -201,14 +230,17 @@ type Erc20Fill @entity(immutable: true) {
 type Erc20FillTypeSummary @entity(immutable: true) {
     id: Bytes!
 
+    _protocol: Protocol!
+
     type: Erc20FillType!
 
-    metrics: Erc20FillTypeSummaryMetrics!
+    data: Erc20FillTypeSummaryData!
 
     # Derived
+    erc20Fills: [Erc20Fill!]! @derivedFrom(field: "_fillTypeSummary")
 }
 
-type Erc20FillTypeSummaryMetrics @entity {
+type Erc20FillTypeSummaryData @entity {
     id: Bytes!
 
     fillVolumeUsd: BigDecimal!
@@ -229,6 +261,8 @@ type NftCollection @entity {
     "Address"
     id: Bytes!
 
+    _protocol: Protocol!
+
     type: NftCollectionType!
 
     address: Bytes!
@@ -237,14 +271,14 @@ type NftCollection @entity {
     name: String
     symbol: String
 
-    metrics: NftCollectionMetrics!
+    data: NftCollectionData!
 
     # Derived
     nfts: [Nft!]! @derivedFrom(field: "collection")
     fills: [NftFill!]! @derivedFrom(field: "collection")
 }
 
-type NftCollectionMetrics @entity {
+type NftCollectionData @entity {
     id: Bytes!
 
     fillCount: BigInt!
@@ -255,6 +289,8 @@ type NftCollectionMetrics @entity {
 type Nft @entity {
     "Collection address + tokenId"
     id: Bytes!
+
+    _protocol: Protocol!
 
     collection: NftCollection!
 
@@ -272,6 +308,8 @@ enum NftFillDirection {
 
 type NftFill @entity {
     id: Bytes!
+
+    _protocol: Protocol!
 
     blockNumber: BigInt!
     timestamp: BigInt!
@@ -299,6 +337,9 @@ type NftFill @entity {
 type Transaction @entity {
     "Transaction hash"
     id: Bytes!
+
+    _protocol: Protocol!
+
     "Transaction hash"
     hash: Bytes!
     "Block number this transaction is part of"
@@ -321,6 +362,7 @@ type Transaction @entity {
     # Counts for filtering
     erc20FillCount: Int!
     erc20TransferCount: Int!
+    nftFillCount: Int!
 
     erc20Transfers: [Erc20Transfer!]!
 
