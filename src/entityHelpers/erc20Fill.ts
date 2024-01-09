@@ -207,10 +207,6 @@ function createErc20FillTypeSummarySnapshotsIfNecessary(
         const dataSnapshot = copyEntity(data, new Erc20FillTypeSummaryData(dataId));
         dataSnapshot.save();
 
-        log.warning("createErc20FillTypeSummarySnapshotsIfNecessary: dataSnapshot.id: {}", [
-            dataSnapshot.id.toHexString(),
-        ]);
-
         if (!dailyData) {
             dailyData = new DailyErc20FillTypeSummaryData(dailyId);
             dailyData.day = day;

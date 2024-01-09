@@ -621,7 +621,7 @@ type DailyErc20FillTypeSummaryData @entity(immutable: true) {
     "Fill type summary the snapshot is for"
     fillTypeSummary: Erc20FillTypeSummary!
     "Snapshot data"
-    data: Erc20TokenPairData!
+    data: Erc20FillTypeSummaryData!
 }
 
 type WeeklyErc20FillTypeSummaryData @entity(immutable: true) {
@@ -636,7 +636,7 @@ type WeeklyErc20FillTypeSummaryData @entity(immutable: true) {
     "Fill type summary the snapshot is for"
     fillTypeSummary: Erc20FillTypeSummary!
     "Snapshot data"
-    data: Erc20TokenPairData!
+    data: Erc20FillTypeSummaryData!
 }
 
 type DailyNftCollectionData @entity(immutable: true) {
@@ -651,7 +651,7 @@ type DailyNftCollectionData @entity(immutable: true) {
     "Collection the snapshot is for"
     collection: NftCollection!
     "Snapshot data"
-    data: Erc20TokenPairData!
+    data: NftCollectionData!
 }
 
 type WeeklyNftCollectionData @entity(immutable: true) {
@@ -666,5 +666,5 @@ type WeeklyNftCollectionData @entity(immutable: true) {
     "Collection the snapshot is for"
     collection: NftCollection!
     "Snapshot data"
-    data: Erc20TokenPairData!
+    data: NftCollectionData!
 }
