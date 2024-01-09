@@ -5,3 +5,5 @@ generated
 build
 
 .env
+
+.hypothesis*

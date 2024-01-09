@@ -213,8 +213,3 @@ templates:
           handler: handleSwap
           receipt: true
       file: ./src/mappings/uniswapV3.ts
-features:
-  - grafting
-graft:
-  base: QmWAe8fq5jgsCS2qcBiVdhbdwodS4zHPjQ1Bh9xEopxsZo
-  block: 11377463

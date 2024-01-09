@@ -3,39 +3,56 @@
 ####
 
 type Protocol @entity {
-    "Hardcoded 0"
+    "Hardcoded 0, singleton"
     id: Bytes!
 
+    "Current data about the protocol"
     data: ProtocolData!
 
     # Derived
-    dailyDataSnapshots: [DailyProtocolData!]! @derivedFrom(field: "protocol")
-    weeklyDataSnapshots: [WeeklyProtocolData!]! @derivedFrom(field: "protocol")
-
+    "Accounts within the protocol, these are those which have been part of fills"
     accounts: [Account!]! @derivedFrom(field: "_protocol")
 
+    "ERC20 tokens 0x has interacted with, or have been transferred in transactions with the x0 protocol"
     erc20Tokens: [Erc20Token!]! @derivedFrom(field: "_protocol")
+    "ERC20 token pairs which erc20 fills have occurred between"
     erc20TokenPairs: [Erc20TokenPair!]! @derivedFrom(field: "_protocol")
+    "ERC20 fills"
     erc20Fills: [Erc20Fill!]! @derivedFrom(field: "_protocol")
+    "Summary for each ERC20 fill type"
     erc20FillTypeSummary: [Erc20FillTypeSummary!]! @derivedFrom(field: "_protocol")
 
+    "NFT collections which have been part of 0x NFT fills"
     nftCollections: [NftCollection!]! @derivedFrom(field: "_protocol")
+    "Individual NFTs which have been transferred as part of an NFT fill"
     nfts: [Nft!]! @derivedFrom(field: "_protocol")
+    "NFT Fills"
     nftFills: [NftFill!]! @derivedFrom(field: "_protocol")
 
+    "All transactions with the 0x protocol"
     transactions: [Transaction!]! @derivedFrom(field: "_protocol")
+
+    "Daily historical protocol data snapshots"
+    dailyDataSnapshots: [DailyProtocolData!]! @derivedFrom(field: "protocol")
+    "Weekly historical protocol data snapshots"
+    weeklyDataSnapshots: [WeeklyProtocolData!]! @derivedFrom(field: "protocol")
 }
 
 type ProtocolData @entity {
     "protocol ID + time qualifier"
     id: Bytes!
 
+    "USD input volume of all ERC20 fills"
     erc20FillVolumeUsd: BigDecimal!
+    "Number of ERC20 fills"
     erc20FillCount: BigInt!
 
+    "USD volume of all ERC20's which were part of NFT fills"
     nftFillErc20VolumeUsd: BigDecimal!
+    "Number of NFT fills"
     nftFillCount: BigInt!
 
+    "Number of unique users"
     uniqueUserCount: BigInt!
 }
 
@@ -52,31 +69,46 @@ type Account @entity {
     "Account address"
     address: Bytes!
 
+    "Account data"
     data: AccountData!
 
     # Derived
+    "All ERC20 fills which this account was the source of"
     erc20SourceFills: [Erc20Fill!]! @derivedFrom(field: "source")
+    "All ERC20 fills which this account was the filler of"
     erc20FillerFills: [Erc20Fill!]! @derivedFrom(field: "filler")
+    "All ERC20 fills which this account was the destination of"
     erc20DestinationFills: [Erc20Fill!]! @derivedFrom(field: "destination")
 
+    "All NFT fills which this account was the maker of"
     nftMakerFills: [NftFill!]! @derivedFrom(field: "maker")
+    "All NFT fills which this account was the taker of"
     nftTakerFills: [NftFill!]! @derivedFrom(field: "taker")
 }
 
 type AccountData @entity {
+    "account ID + time qualifier"
     id: Bytes!
 
+    "Volume in USD of erc20 fills where this account was the source"
     erc20FillSourceVolumeUsd: BigDecimal!
+    "Volume in USD of erc20 fills where this account was the filler"
     erc20FillFillerVolumeUsd: BigDecimal!
+    "Volume in USD of erc20 fills where this account was the destination"
     erc20FillDestinationVolumeUsd: BigDecimal!
 
+    "Number of erc20 fills this account was the source of"
     erc20FillSourceCount: BigInt!
+    "Number of erc20 fills this account was the filler of"
     erc20FillFillerCount: BigInt!
+    "Number of erc20 fills this account was the destination of"
     erc20FillDestinationCount: BigInt!
+
+    # TODO: nft fill counts!
 }
 
 type _ActiveUser @entity {
-    "Address + usecase specific metadata, this is just a helper for tracking overall usage"
+    "Address + use case specific metadata, this is just a helper for tracking overall usage"
     id: Bytes!
 }
 
@@ -101,41 +133,62 @@ type Erc20Token @entity {
 
     "Current data"
     data: Erc20TokenData!
+    "Last block the current data was updated"
     lastUpdatedBlock: BigInt!
+    "Last block used to source the derived ETH price of the current data"
     lastDerivedPriceBlock: BigInt!
 
     # Derived
-    dailyDataSnapshots: [DailyErc20TokenData!]! @derivedFrom(field: "token")
-    weeklyDataSnapshots: [WeeklyErc20TokenData!]! @derivedFrom(field: "token")
-
+    "Erc20 fills that this token is an input token of"
     erc20InputTokenFills: [Erc20Fill!]! @derivedFrom(field: "inputToken")
+    "Erc20 fills that this token is an output token of"
     erc20OutputTokenFills: [Erc20Fill!]! @derivedFrom(field: "outputToken")
+    "Erc20 token pairs where this token is tokenA, together with pairsA is all erc20 token pairs this token is part of"
     pairsA: [Erc20TokenPair!]! @derivedFrom(field: "tokenA")
+    "Erc20 token pairs where this token is tokenB, together with pairsB is all erc20 token pairs this token is part of"
     pairsB: [Erc20TokenPair!]! @derivedFrom(field: "tokenB")
 
+    "Nft fills where this token was used"
     nftFills: [NftFill!]! @derivedFrom(field: "erc20Token")
+
+    "Daily historical erc20 data snapshots"
+    dailyDataSnapshots: [DailyErc20TokenData!]! @derivedFrom(field: "token")
+    "Weekly historical erc20 data snapshots"
+    weeklyDataSnapshots: [WeeklyErc20TokenData!]! @derivedFrom(field: "token")
 }
 
 type Erc20TokenData @entity {
     "TokenId + time qualifier"
     id: Bytes!
 
+    "Token this data is for"
     token: Erc20Token!
 
+    "Input volume of this tokens across all erc20 fills"
     erc20FillInputVolume: BigInt!
+    "Output volume of this tokens across all erc20 fills"
     erc20FillOutputVolume: BigInt!
 
+    "Input volume in USD of this tokens across all erc20 fills"
     erc20FillInputVolumeUsd: BigDecimal!
+    "Output volume in USD of this tokens across all erc20 fills"
     erc20FillOutputVolumeUsd: BigDecimal!
 
+    "Number of erc20 fills where this token is the input"
     erc20InputFillCount: BigInt!
+    "Number of erc20 fills where this token is the output"
     erc20OutputFillCount: BigInt!
 
+    "Volume of this token in Nft fills"
     nftFillVolume: BigInt!
+    "Volume of this token in USD of Nft fills"
     nftFillVolumeUsd: BigDecimal!
+    "Number of Nft fills this token is part of"
     nftFillCount: BigInt!
 
+    "Derived token price in ETH"
     derivedPriceInEth: BigDecimal!
+    "Derived token price in USD"
     derivedPriceInUsd: BigDecimal!
 }
 
@@ -152,12 +205,16 @@ type Erc20TokenPair @entity {
 
     "Current data"
     data: Erc20TokenPairData!
+    "Last block the current data was updated"
     lastUpdatedBlock: BigInt!
 
     # Derived
+    "Erc20 fills that this token pair is part of"
     fills: [Erc20Fill!]! @derivedFrom(field: "tokenPair")
 
+    "Daily historical token pair data snapshots"
     dailyDataSnapshots: [DailyErc20TokenPairData!]! @derivedFrom(field: "pair")
+    "Weekly historical token pair data snapshots"
     weeklyDataSnapshots: [WeeklyErc20TokenPairData!]! @derivedFrom(field: "pair")
 }
 
@@ -165,12 +222,14 @@ type Erc20TokenPairData @entity {
     "pairId + time qualifier"
     id: Bytes!
 
-    "Volume of tokenA traded to tokenB for the time period"
+    "Volume of tokenA traded to tokenB"
     volumeAtoB: BigInt!
-    "Volume of tokenB traded to tokenA for the time period"
+    "Volume of tokenB traded to tokenA"
     volumeBtoA: BigInt!
 
+    "Number of erc20 fills where tokenA is the input and tokenB is the output"
     fillCountAtoB: BigInt!
+    "Number of erc20 fills where tokenB is the input and tokenA is the output"
     fillCountBtoA: BigInt!
 
     "Exchange rate (a.k.a price) from tokenA to tokenB, i.e tokenAAmount * 10^(tokenADecimals) * exchangeRateAtoB = tokenB equivalent"
@@ -197,13 +256,19 @@ type Erc20Fill @entity(immutable: true) {
 
     _protocol: Protocol!
 
+    "Block number where the fill happened"
     blockNumber: BigInt!
+    "Timestamp in seconds since unix epoch"
     timestamp: BigInt!
 
+    "Transaction this fill is part of"
     transaction: Transaction!
+    "Log index for the main event of this fill"
     logIndex: BigInt!
 
+    "Fill type"
     type: Erc20FillType!
+    "Fill type summary, this is just used for derived fields"
     _fillTypeSummary: Erc20FillTypeSummary!
 
     "Account which is the source of input tokens, this is the maker for native order and the swapper for AMMs"
@@ -233,30 +298,40 @@ type Erc20Fill @entity(immutable: true) {
     "Optional extra data, this is used to store the order hash + pool for native orders, and pool info for bridge orders"
     extraData: String
 
+    "Token pair involved in this fill"
     tokenPair: Erc20TokenPair!
 }
 
 type Erc20FillTypeSummary @entity(immutable: true) {
+    "Type"
     id: Bytes!
 
     _protocol: Protocol!
 
+    "Type this summary is for"
     type: Erc20FillType!
 
+    "Current data of the summary"
     data: Erc20FillTypeSummaryData!
 
     # Derived
+    "All Erc20 fills of this fill type"
     erc20Fills: [Erc20Fill!]! @derivedFrom(field: "_fillTypeSummary")
 
+    "Daily historical fill type summary data snapshots"
     dailyDataSnapshots: [DailyErc20FillTypeSummaryData!]! @derivedFrom(field: "fillTypeSummary")
+    "Weekly historical fill type summary data snapshots"
     weeklyDataSnapshots: [WeeklyErc20FillTypeSummaryData!]! @derivedFrom(field: "fillTypeSummary")
 }
 
 type Erc20FillTypeSummaryData @entity {
     id: Bytes!
 
+    "Fill volume in USD for fills of this fill type"
     fillVolumeUsd: BigDecimal!
+    "Number of fills of this fill type"
     fillCount: BigInt!
+    "Number of unique users who use this fill type"
     uniqueUsers: BigInt!
 }
 
@@ -275,29 +350,40 @@ type NftCollection @entity {
 
     _protocol: Protocol!
 
+    "Type of Nft collection"
     type: NftCollectionType!
 
+    "Address of the Nft collection"
     address: Bytes!
 
-    # Some ERC721 don't support and ERC1155 doesn't support these
+    "Name of the Nft collection, Erc1155 doesn't support this, and some Erc721's also don't"
     name: String
+    "Symbol of the Nft collection, Erc1155 doesn't support this, and some Erc721's also don't"
     symbol: String
 
+    "Current data about the nft collection"
     data: NftCollectionData!
 
     # Derived
+    "All nfts which were part of Nft fills from this collection"
     nfts: [Nft!]! @derivedFrom(field: "collection")
+    "All nft fills involving Nft's in this collection"
     fills: [NftFill!]! @derivedFrom(field: "collection")
 
+    "Daily historical fill nft collection data snapshots"
     dailyDataSnapshots: [DailyNftCollectionData!]! @derivedFrom(field: "collection")
+    "Weekly historical fill nft collection data snapshots"
     weeklyDataSnapshots: [WeeklyNftCollectionData!]! @derivedFrom(field: "collection")
 }
 
 type NftCollectionData @entity {
     id: Bytes!
 
+    "Number of fills of nft's in the collection"
     fillCount: BigInt!
+    "USD volume of all Erc20's used as part of the fills with nft's in the collection"
     erc20VolumeUsd: BigDecimal!
+    "Average price in USD of Nft fills in this collection"
     averageFillPriceUsd: BigDecimal!
 }
 
@@ -307,12 +393,16 @@ type Nft @entity {
 
     _protocol: Protocol!
 
+    "Collection the Nft belongs to"
     collection: NftCollection!
 
+    "Token ID of the Nft"
     tokenId: BigInt!
+    "Token uri of the Nft if it exists"
     tokenUri: String
 
     # Derived
+    "All fills which this Nft has been part of"
     fills: [NftFill!]! @derivedFrom(field: "nft")
 }
 
@@ -322,26 +412,39 @@ enum NftFillDirection {
 }
 
 type NftFill @entity {
+    "txn hash + log index"
     id: Bytes!
 
     _protocol: Protocol!
 
+    "Block number where the fill happened"
     blockNumber: BigInt!
+    "Timestamp in seconds since unix epoch"
     timestamp: BigInt!
 
+    "Transaction this fill is part of"
     transaction: Transaction!
+    "Log index for the main event of this fill"
     logIndex: BigInt!
 
+    "Fill type"
     type: NftCollectionType!
+    "Direction of the fill"
     direction: NftFillDirection!
 
+    "Maker in the Nft fill"
     maker: Account!
+    "Taker in the Nft fill"
     taker: Account!
 
+    "Nft collection of the Nft involved in the fill"
     collection: NftCollection!
+    "Nft for the fill"
     nft: Nft!
 
+    "Erc20 token used in exchange for the Nft"
     erc20Token: Erc20Token!
+    "Erc20 token amount in exchange for the Nft"
     erc20TokenAmount: BigInt!
 }
 
@@ -375,14 +478,20 @@ type Transaction @entity {
     gasUsed: BigInt
 
     # Counts for filtering
+    "Number of erc20 fills in the transaction"
     erc20FillCount: Int!
+    "Number of erc20 transfers in the transaction"
     erc20TransferCount: Int!
+    "Number of nft fills in the transaction"
     nftFillCount: Int!
 
+    "All Erc20 transfers that are part of this transaction"
     erc20Transfers: [Erc20Transfer!]!
 
     # Derived
+    "All erc20 fills that are part of this transaction"
     erc20Fills: [Erc20Fill!]! @derivedFrom(field: "transaction")
+    "All nft fills that are part of this transaction"
     nftFills: [NftFill!]! @derivedFrom(field: "transaction")
 }
 
@@ -391,12 +500,18 @@ type Erc20Transfer @entity(immutable: true) {
     "txn hash + log index"
     id: Bytes!
 
+    "Transaction the transfer is part of"
     transaction: Transaction!
+    "Log index of the transfer event"
     logIndex: BigInt!
+    "Token being transferred"
     token: Erc20Token!
 
-    from: Account!
-    to: Account!
+    "Account the transfer is from"
+    from: Account! # TODO: make these just bytes (?)
+    "Account the transfer is to"
+    to: Account! # TODO: make these just bytes (?)
+    "Amount of the transfer"
     amount: BigInt!
 }
 
@@ -405,101 +520,151 @@ type Erc20Transfer @entity(immutable: true) {
 ####
 
 type DailyProtocolData @entity(immutable: true) {
+    "Protocol id + day"
     id: Bytes!
 
+    "Days since unix epoch that this snapshot is for"
     day: BigInt!
+    "Timestamp of the snapshot in seconds since unix epoch"
     timestamp: BigInt!
 
+    "Protocol the snapshot is for"
     protocol: Protocol!
+    "Snapshot data"
     data: ProtocolData!
 }
 
 type WeeklyProtocolData @entity(immutable: true) {
+    "Protocol id + week"
     id: Bytes!
 
+    "Weeks since unix epoch that this snapshot is for"
     week: BigInt!
+    "Timestamp of the snapshot in seconds since unix epoch"
     timestamp: BigInt!
 
+    "Protocol the snapshot is for"
     protocol: Protocol!
+    "Snapshot data"
     data: ProtocolData!
 }
 
 type DailyErc20TokenData @entity(immutable: true) {
+    "Erc20Token id + day"
     id: Bytes!
 
+    "Days since unix epoch that this snapshot is for"
     day: BigInt!
+    "Timestamp of the snapshot in seconds since unix epoch"
     timestamp: BigInt!
 
+    "Token the snapshot is for"
     token: Erc20Token!
+    "Snapshot data"
     data: Erc20TokenData!
 }
 
 type WeeklyErc20TokenData @entity(immutable: true) {
+    "Erc20Token id + week"
     id: Bytes!
 
+    "Weeks since unix epoch that this snapshot is for"
     week: BigInt!
+    "Timestamp of the snapshot in seconds since unix epoch"
     timestamp: BigInt!
 
+    "Token the snapshot is for"
     token: Erc20Token!
+    "Snapshot data"
     data: Erc20TokenData!
 }
 
 type DailyErc20TokenPairData @entity(immutable: true) {
+    "Erc20 pair id + day"
     id: Bytes!
 
+    "Days since unix epoch that this snapshot is for"
     day: BigInt!
+    "Timestamp of the snapshot in seconds since unix epoch"
     timestamp: BigInt!
 
+    "Erc20 pair the snapshot is for"
     pair: Erc20TokenPair!
+    "Snapshot data"
     data: Erc20TokenPairData!
 }
 
 type WeeklyErc20TokenPairData @entity(immutable: true) {
+    "Erc20 pair id + week"
     id: Bytes!
 
+    "Weeks since unix epoch that this snapshot is for"
     week: BigInt!
+    "Timestamp of the snapshot in seconds since unix epoch"
     timestamp: BigInt!
 
+    "Erc20 pair the snapshot is for"
     pair: Erc20TokenPair!
+    "Snapshot data"
     data: Erc20TokenPairData!
 }
 
 type DailyErc20FillTypeSummaryData @entity(immutable: true) {
+    "fillTypeSummary id + day"
     id: Bytes!
 
+    "Days since unix epoch that this snapshot is for"
     day: BigInt!
+    "Timestamp of the snapshot in seconds since unix epoch"
     timestamp: BigInt!
 
+    "Fill type summary the snapshot is for"
     fillTypeSummary: Erc20FillTypeSummary!
+    "Snapshot data"
     data: Erc20TokenPairData!
 }
 
 type WeeklyErc20FillTypeSummaryData @entity(immutable: true) {
+    "fillTypeSummary id + week"
     id: Bytes!
 
+    "Weeks since unix epoch that this snapshot is for"
     week: BigInt!
+    "Timestamp of the snapshot in seconds since unix epoch"
     timestamp: BigInt!
 
+    "Fill type summary the snapshot is for"
     fillTypeSummary: Erc20FillTypeSummary!
+    "Snapshot data"
     data: Erc20TokenPairData!
 }
 
 type DailyNftCollectionData @entity(immutable: true) {
+    "Collection id + day"
     id: Bytes!
 
+    "Days since unix epoch that this snapshot is for"
     day: BigInt!
+    "Timestamp of the snapshot in seconds since unix epoch"
     timestamp: BigInt!
 
+    "Collection the snapshot is for"
     collection: NftCollection!
+    "Snapshot data"
     data: Erc20TokenPairData!
 }
 
 type WeeklyNftCollectionData @entity(immutable: true) {
+    "Collection id + week"
     id: Bytes!
 
+    "Weeks since unix epoch that this snapshot is for"
     week: BigInt!
+    "Timestamp of the snapshot in seconds since unix epoch"
     timestamp: BigInt!
 
+    "Collection the snapshot is for"
     collection: NftCollection!
+    "Snapshot data"
     data: Erc20TokenPairData!
 }

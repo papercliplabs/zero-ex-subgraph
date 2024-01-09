@@ -107,6 +107,10 @@ function createNftCollectionDataSnapshotsIfNecessary(
         const dataSnapshot = copyEntity(data, new NftCollectionData(dataId));
         dataSnapshot.save();
 
+        log.warning("createNftCollectionDataSnapshotsIfNecessary: dataSnapshot.id: {}", [
+            dataSnapshot.id.toHexString(),
+        ]);
+
         if (!dailyData) {
             dailyData = new DailyNftCollectionData(dailyId);
             dailyData.day = day;

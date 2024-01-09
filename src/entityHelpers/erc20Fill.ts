@@ -1,4 +1,4 @@
-import { ethereum, Address, BigInt, Bytes, BigDecimal } from "@graphprotocol/graph-ts";
+import { ethereum, Address, BigInt, Bytes, BigDecimal, log } from "@graphprotocol/graph-ts";
 import {
     DailyErc20FillTypeSummaryData,
     Erc20Fill,
@@ -18,7 +18,6 @@ import {
     SECONDS_PER_DAY,
     SECONDS_PER_HOUR,
     SECONDS_PER_WEEK,
-    SECONDS_PER_YEAR,
     UniqueUserUsageId,
     ZERO_BD,
     ZERO_BI,
@@ -206,8 +205,11 @@ function createErc20FillTypeSummarySnapshotsIfNecessary(
     if (!dailyData || !weeklyData) {
         const dataId = hourlyId;
         const dataSnapshot = copyEntity(data, new Erc20FillTypeSummaryData(dataId));
-
         dataSnapshot.save();
+
+        log.warning("createErc20FillTypeSummarySnapshotsIfNecessary: dataSnapshot.id: {}", [
+            dataSnapshot.id.toHexString(),
+        ]);
 
         if (!dailyData) {
             dailyData = new DailyErc20FillTypeSummaryData(dailyId);

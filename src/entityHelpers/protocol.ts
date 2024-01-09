@@ -1,9 +1,8 @@
-import { BigDecimal, Bytes, dataSource, ethereum } from "@graphprotocol/graph-ts";
+import { BigDecimal, Bytes, ethereum } from "@graphprotocol/graph-ts";
 import { DailyProtocolData, Protocol, ProtocolData, WeeklyProtocolData, _ActiveUser } from "../../generated/schema";
 import {
     EXCLUDE_HISTORICAL_DATA,
     ONE_BI,
-    SECONDS_PER_BLOCK,
     SECONDS_PER_DAY,
     SECONDS_PER_HOUR,
     SECONDS_PER_WEEK,

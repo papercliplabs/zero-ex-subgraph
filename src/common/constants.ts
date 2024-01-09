@@ -54,8 +54,6 @@ export const TRANSFER_EVENT_SIGNATURE = crypto.keccak256(ByteArray.fromUTF8("Tra
 
 export const CHAINLINK_PRICE_FEED_FACTOR = BigDecimal.fromString("100000000"); // 10^8
 
-export const ERC1155_INTERFACE_ID = Bytes.fromHexString("0xd9b67a26");
-
 // Indexing params
 
 // If true, will ignore optimized swaps which are quite indexing intensive, this will significantly speed up indexing (at the cost of missing data)

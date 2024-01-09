@@ -13,7 +13,6 @@ import {
     SECONDS_PER_DAY,
     SECONDS_PER_HOUR,
     SECONDS_PER_WEEK,
-    SECONDS_PER_YEAR,
     ZERO_BD,
     ZERO_BI,
 } from "../common/constants";

@@ -1,6 +1,6 @@
-import { Address, BigDecimal, BigInt, Bytes, Entity, Value, ethereum, log } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt, Bytes, Entity, ethereum } from "@graphprotocol/graph-ts";
 import { getErc20TransfersForTransaction, getOrCreateTransaction } from "../entityHelpers/transaction";
-import { Erc20Token, Erc20Transfer, _ActiveUser } from "../../generated/schema";
+import { Erc20Transfer, _ActiveUser } from "../../generated/schema";
 import { ZERO_BD } from "./constants";
 
 export function findMatchingErc20Transfer(
@@ -36,15 +36,6 @@ export function findMatchingErc20Transfer(
         foundTransfer = transfer;
     }
 
-    // if (!foundTransfer) {
-    //     log.warning("Didn't find matching erc20 transfer: hash={}, token={}, amount={}, from={}, to={}", [
-    //         event.transaction.hash.toHexString(),
-    //         tokenAddress.toHexString(),
-    //         amount.toString(),
-    //         from ? from.toHexString() : "NULL",
-    //         to ? to.toHexString() : "NULL",
-    //     ]);
-    // }
     return foundTransfer;
 }
 
@@ -120,7 +111,6 @@ export function copyEntity<T extends Entity>(from: T, to: T): T {
     for (let i = 0; i < entries.length; ++i) {
         // Only set if it isn't already (preserves ID, and any other attributes set)
         if (to.get(entries[i].key) == null) {
-            log.warning("COPY ENTITY, key: {}, from: {}", [entries[i].key, entries[i].value.data.toString()]);
             to.set(entries[i].key, entries[i].value);
         }
     }
