@@ -1,8 +1,23 @@
-import { Address, BigDecimal, ethereum, log } from "@graphprotocol/graph-ts";
-import { NftCollection, NftCollectionData } from "../../generated/schema";
-import { NftCollectionType, ONE_BI, ZERO_BD, ZERO_BI } from "../common/constants";
+import { Address, BigDecimal, Bytes, ethereum, log } from "@graphprotocol/graph-ts";
+import {
+    DailyNftCollectionData,
+    NftCollection,
+    NftCollectionData,
+    WeeklyNftCollectionData,
+} from "../../generated/schema";
+import {
+    EXCLUDE_HISTORICAL_DATA,
+    NftCollectionType,
+    ONE_BI,
+    SECONDS_PER_DAY,
+    SECONDS_PER_HOUR,
+    SECONDS_PER_WEEK,
+    ZERO_BD,
+    ZERO_BI,
+} from "../common/constants";
 import { Erc721 as Erc721Contract } from "../../generated/ZeroExProxy/Erc721";
 import { getOrCreateProtocol } from "./protocol";
+import { copyEntity } from "../common/utils";
 
 // type is NftCollectionType
 export function getOrCreateNftCollection(
@@ -64,9 +79,50 @@ export function updateNftCollectionDataForNftFill(
     data.save();
 
     // Create snapshots
-    createNftCollectionDataSnapshotsIfNecessary(data, event);
+    createNftCollectionDataSnapshotsIfNecessary(collection, data, event);
 }
 
-function createNftCollectionDataSnapshotsIfNecessary(data: NftCollectionData, event: ethereum.Event): void {
-    // TODO
+function createNftCollectionDataSnapshotsIfNecessary(
+    collection: NftCollection,
+    data: NftCollectionData,
+    event: ethereum.Event
+): void {
+    if (EXCLUDE_HISTORICAL_DATA) {
+        return;
+    }
+
+    const hour = event.block.timestamp.div(SECONDS_PER_HOUR);
+    const day = event.block.timestamp.div(SECONDS_PER_DAY);
+    const week = event.block.timestamp.div(SECONDS_PER_WEEK);
+
+    const hourlyId = collection.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(hour)));
+    const dailyId = collection.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(day)));
+    const weeklyId = collection.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(week)));
+
+    let dailyData = DailyNftCollectionData.load(dailyId);
+    let weeklyData = WeeklyNftCollectionData.load(weeklyId);
+
+    if (!dailyData || !weeklyData) {
+        const dataId = hourlyId;
+        const dataSnapshot = copyEntity(data, new NftCollectionData(dataId));
+        dataSnapshot.save();
+
+        if (!dailyData) {
+            dailyData = new DailyNftCollectionData(dailyId);
+            dailyData.day = day;
+            dailyData.timestamp = event.block.timestamp;
+            dailyData.collection = collection.id;
+            dailyData.data = dataSnapshot.id;
+            dailyData.save();
+        }
+
+        if (!weeklyData) {
+            weeklyData = new WeeklyNftCollectionData(weeklyId);
+            weeklyData.week = week;
+            weeklyData.timestamp = event.block.timestamp;
+            weeklyData.collection = collection.id;
+            weeklyData.data = dataSnapshot.id;
+            weeklyData.save();
+        }
+    }
 }

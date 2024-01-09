@@ -1,8 +1,23 @@
-import { Address, BigInt, ethereum, log } from "@graphprotocol/graph-ts";
-import { Erc20TokenPair, Erc20TokenPairData } from "../../generated/schema";
+import { Address, BigInt, Bytes, ethereum, log } from "@graphprotocol/graph-ts";
+import {
+    DailyErc20TokenPairData,
+    Erc20TokenPair,
+    Erc20TokenPairData,
+    WeeklyErc20TokenPairData,
+} from "../../generated/schema";
 import { getOrCreateErc20Token } from "./erc20Token";
-import { ONE_BD, ONE_BI, ZERO_BD, ZERO_BI } from "../common/constants";
-import { bigDecimalSafeDiv, formatUnits } from "../common/utils";
+import {
+    EXCLUDE_HISTORICAL_DATA,
+    ONE_BD,
+    ONE_BI,
+    SECONDS_PER_DAY,
+    SECONDS_PER_HOUR,
+    SECONDS_PER_WEEK,
+    SECONDS_PER_YEAR,
+    ZERO_BD,
+    ZERO_BI,
+} from "../common/constants";
+import { bigDecimalSafeDiv, copyEntity, formatUnits } from "../common/utils";
 import { getOrCreateProtocol } from "./protocol";
 
 export function getOrCreateErc20TokenPair(
@@ -89,9 +104,50 @@ export function updateErc20TokenPairData(
     pair.save();
 
     // Create snapshots
-    createErc20PairDataSnapshotsIfNecessary(data, event);
+    createErc20PairDataSnapshotsIfNecessary(pair, data, event);
 }
 
-function createErc20PairDataSnapshotsIfNecessary(data: Erc20TokenPairData, event: ethereum.Event): void {
-    // TODO
+function createErc20PairDataSnapshotsIfNecessary(
+    pair: Erc20TokenPair,
+    data: Erc20TokenPairData,
+    event: ethereum.Event
+): void {
+    if (EXCLUDE_HISTORICAL_DATA) {
+        return;
+    }
+
+    const hour = event.block.timestamp.div(SECONDS_PER_HOUR);
+    const day = event.block.timestamp.div(SECONDS_PER_DAY);
+    const week = event.block.timestamp.div(SECONDS_PER_WEEK);
+
+    const hourlyId = pair.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(hour)));
+    const dailyId = pair.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(day)));
+    const weeklyId = pair.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(week)));
+
+    let dailyData = DailyErc20TokenPairData.load(dailyId);
+    let weeklyData = WeeklyErc20TokenPairData.load(weeklyId);
+
+    if (!dailyData || !weeklyData) {
+        const dataId = hourlyId;
+        const dataSnapshot = copyEntity(data, new Erc20TokenPairData(dataId));
+        dataSnapshot.save();
+
+        if (!dailyData) {
+            dailyData = new DailyErc20TokenPairData(dailyId);
+            dailyData.day = day;
+            dailyData.timestamp = event.block.timestamp;
+            dailyData.pair = pair.id;
+            dailyData.data = dataSnapshot.id;
+            dailyData.save();
+        }
+
+        if (!weeklyData) {
+            weeklyData = new WeeklyErc20TokenPairData(weeklyId);
+            weeklyData.week = week;
+            weeklyData.timestamp = event.block.timestamp;
+            weeklyData.pair = pair.id;
+            weeklyData.data = dataSnapshot.id;
+            weeklyData.save();
+        }
+    }
 }

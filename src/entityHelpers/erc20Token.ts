@@ -1,15 +1,32 @@
-import { ethereum, Address, log, BigInt, BigDecimal } from "@graphprotocol/graph-ts";
-import { Erc20Token, Erc20TokenData, Erc20TokenPairData } from "../../generated/schema";
+import { ethereum, Address, log, BigInt, BigDecimal, Bytes } from "@graphprotocol/graph-ts";
+import {
+    DailyErc20TokenData,
+    Erc20Token,
+    Erc20TokenData,
+    Erc20TokenPairData,
+    WeeklyErc20TokenData,
+} from "../../generated/schema";
 import { Erc20 as Erc20Contract } from "../../generated/FlashWallet/Erc20";
 import { ChainlinkPriceFeed as ChainlinkPriceFeedContract } from "../../generated/FlashWallet/ChainlinkPriceFeed";
-import { CHAINLINK_PRICE_FEED_FACTOR, ETH_ADDRESS, ONE_BD, ONE_BI, ZERO_BD, ZERO_BI } from "../common/constants";
+import {
+    CHAINLINK_PRICE_FEED_FACTOR,
+    ETH_ADDRESS,
+    EXCLUDE_HISTORICAL_DATA,
+    ONE_BD,
+    ONE_BI,
+    SECONDS_PER_DAY,
+    SECONDS_PER_HOUR,
+    SECONDS_PER_WEEK,
+    ZERO_BD,
+    ZERO_BI,
+} from "../common/constants";
 import {
     getChainlinkEthToUsdPriceFeedAddress,
     getTokenAddressWhitelist,
     getWrappedNativeAssetAddress,
 } from "../common/networkSpecific";
 import { getOrCreateErc20TokenPair } from "./erc20TokenPair";
-import { bigIntMin, formatUnits } from "../common/utils";
+import { bigIntMin, copyEntity, formatUnits } from "../common/utils";
 import { getOrCreateProtocol } from "./protocol";
 
 export function getOrCreateErc20Token(address: Address, event: ethereum.Event): Erc20Token {
@@ -104,7 +121,7 @@ export function updateErc20TokenDataForErc20FillAndGetDerivedFillAmountUsd(
     token.save();
 
     // Create snapshots
-    createErc20TokenDataSnapshotsIfNecessary(data, event);
+    createErc20TokenDataSnapshotsIfNecessary(token, data, event);
 
     return fillAmountUsd;
 }
@@ -184,11 +201,52 @@ export function updateErc20TokenDataForNftFillAndGetDerivedFillAmountUsd(
     data.save();
 
     // Create snapshots
-    createErc20TokenDataSnapshotsIfNecessary(data, event);
+    createErc20TokenDataSnapshotsIfNecessary(token, data, event);
 
     return fillAmountUsd;
 }
 
-function createErc20TokenDataSnapshotsIfNecessary(data: Erc20TokenData, event: ethereum.Event): void {
-    // TODO
+function createErc20TokenDataSnapshotsIfNecessary(
+    token: Erc20Token,
+    data: Erc20TokenData,
+    event: ethereum.Event
+): void {
+    if (EXCLUDE_HISTORICAL_DATA) {
+        return;
+    }
+
+    const hour = event.block.timestamp.div(SECONDS_PER_HOUR);
+    const day = event.block.timestamp.div(SECONDS_PER_DAY);
+    const week = event.block.timestamp.div(SECONDS_PER_WEEK);
+
+    const hourlyId = token.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(hour)));
+    const dailyId = token.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(day)));
+    const weeklyId = token.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(week)));
+
+    let dailyData = DailyErc20TokenData.load(dailyId);
+    let weeklyData = WeeklyErc20TokenData.load(weeklyId);
+
+    if (!dailyData || !weeklyData) {
+        const dataId = hourlyId;
+        const dataSnapshot = copyEntity(data, new Erc20TokenData(dataId));
+        dataSnapshot.save();
+
+        if (!dailyData) {
+            dailyData = new DailyErc20TokenData(dailyId);
+            dailyData.day = day;
+            dailyData.timestamp = event.block.timestamp;
+            dailyData.token = token.id;
+            dailyData.data = dataSnapshot.id;
+            dailyData.save();
+        }
+
+        if (!weeklyData) {
+            weeklyData = new WeeklyErc20TokenData(weeklyId);
+            weeklyData.week = week;
+            weeklyData.timestamp = event.block.timestamp;
+            weeklyData.token = token.id;
+            weeklyData.data = dataSnapshot.id;
+            weeklyData.save();
+        }
+    }
 }

@@ -9,6 +9,9 @@ type Protocol @entity {
     data: ProtocolData!
 
     # Derived
+    dailyDataSnapshots: [DailyProtocolData!]! @derivedFrom(field: "protocol")
+    weeklyDataSnapshots: [WeeklyProtocolData!]! @derivedFrom(field: "protocol")
+
     accounts: [Account!]! @derivedFrom(field: "_protocol")
 
     erc20Tokens: [Erc20Token!]! @derivedFrom(field: "_protocol")
@@ -102,6 +105,9 @@ type Erc20Token @entity {
     lastDerivedPriceBlock: BigInt!
 
     # Derived
+    dailyDataSnapshots: [DailyErc20TokenData!]! @derivedFrom(field: "token")
+    weeklyDataSnapshots: [WeeklyErc20TokenData!]! @derivedFrom(field: "token")
+
     erc20InputTokenFills: [Erc20Fill!]! @derivedFrom(field: "inputToken")
     erc20OutputTokenFills: [Erc20Fill!]! @derivedFrom(field: "outputToken")
     pairsA: [Erc20TokenPair!]! @derivedFrom(field: "tokenA")
@@ -150,6 +156,9 @@ type Erc20TokenPair @entity {
 
     # Derived
     fills: [Erc20Fill!]! @derivedFrom(field: "tokenPair")
+
+    dailyDataSnapshots: [DailyErc20TokenPairData!]! @derivedFrom(field: "pair")
+    weeklyDataSnapshots: [WeeklyErc20TokenPairData!]! @derivedFrom(field: "pair")
 }
 
 type Erc20TokenPairData @entity {
@@ -238,6 +247,9 @@ type Erc20FillTypeSummary @entity(immutable: true) {
 
     # Derived
     erc20Fills: [Erc20Fill!]! @derivedFrom(field: "_fillTypeSummary")
+
+    dailyDataSnapshots: [DailyErc20FillTypeSummaryData!]! @derivedFrom(field: "fillTypeSummary")
+    weeklyDataSnapshots: [WeeklyErc20FillTypeSummaryData!]! @derivedFrom(field: "fillTypeSummary")
 }
 
 type Erc20FillTypeSummaryData @entity {
@@ -276,6 +288,9 @@ type NftCollection @entity {
     # Derived
     nfts: [Nft!]! @derivedFrom(field: "collection")
     fills: [NftFill!]! @derivedFrom(field: "collection")
+
+    dailyDataSnapshots: [DailyNftCollectionData!]! @derivedFrom(field: "collection")
+    weeklyDataSnapshots: [WeeklyNftCollectionData!]! @derivedFrom(field: "collection")
 }
 
 type NftCollectionData @entity {
@@ -388,3 +403,103 @@ type Erc20Transfer @entity(immutable: true) {
 ####
 # Historical Snapshots
 ####
+
+type DailyProtocolData @entity(immutable: true) {
+    id: Bytes!
+
+    day: BigInt!
+    timestamp: BigInt!
+
+    protocol: Protocol!
+    data: ProtocolData!
+}
+
+type WeeklyProtocolData @entity(immutable: true) {
+    id: Bytes!
+
+    week: BigInt!
+    timestamp: BigInt!
+
+    protocol: Protocol!
+    data: ProtocolData!
+}
+
+type DailyErc20TokenData @entity(immutable: true) {
+    id: Bytes!
+
+    day: BigInt!
+    timestamp: BigInt!
+
+    token: Erc20Token!
+    data: Erc20TokenData!
+}
+
+type WeeklyErc20TokenData @entity(immutable: true) {
+    id: Bytes!
+
+    week: BigInt!
+    timestamp: BigInt!
+
+    token: Erc20Token!
+    data: Erc20TokenData!
+}
+
+type DailyErc20TokenPairData @entity(immutable: true) {
+    id: Bytes!
+
+    day: BigInt!
+    timestamp: BigInt!
+
+    pair: Erc20TokenPair!
+    data: Erc20TokenPairData!
+}
+
+type WeeklyErc20TokenPairData @entity(immutable: true) {
+    id: Bytes!
+
+    week: BigInt!
+    timestamp: BigInt!
+
+    pair: Erc20TokenPair!
+    data: Erc20TokenPairData!
+}
+
+type DailyErc20FillTypeSummaryData @entity(immutable: true) {
+    id: Bytes!
+
+    day: BigInt!
+    timestamp: BigInt!
+
+    fillTypeSummary: Erc20FillTypeSummary!
+    data: Erc20TokenPairData!
+}
+
+type WeeklyErc20FillTypeSummaryData @entity(immutable: true) {
+    id: Bytes!
+
+    week: BigInt!
+    timestamp: BigInt!
+
+    fillTypeSummary: Erc20FillTypeSummary!
+    data: Erc20TokenPairData!
+}
+
+type DailyNftCollectionData @entity(immutable: true) {
+    id: Bytes!
+
+    day: BigInt!
+    timestamp: BigInt!
+
+    collection: NftCollection!
+    data: Erc20TokenPairData!
+}
+
+type WeeklyNftCollectionData @entity(immutable: true) {
+    id: Bytes!
+
+    week: BigInt!
+    timestamp: BigInt!
+
+    collection: NftCollection!
+    data: Erc20TokenPairData!
+}

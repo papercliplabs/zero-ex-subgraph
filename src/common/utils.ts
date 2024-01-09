@@ -1,6 +1,6 @@
-import { Address, BigDecimal, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
+import { Address, BigDecimal, BigInt, Bytes, Entity, Value, ethereum, log } from "@graphprotocol/graph-ts";
 import { getErc20TransfersForTransaction, getOrCreateTransaction } from "../entityHelpers/transaction";
-import { Erc20Transfer, _ActiveUser } from "../../generated/schema";
+import { Erc20Token, Erc20Transfer, _ActiveUser } from "../../generated/schema";
 import { ZERO_BD } from "./constants";
 
 export function findMatchingErc20Transfer(
@@ -113,4 +113,17 @@ export function isUniqueUser(address: Address, uniqueUserUsageId: Bytes): boolea
     } else {
         return false;
     }
+}
+
+export function copyEntity<T extends Entity>(from: T, to: T): T {
+    const entries = from.entries;
+    for (let i = 0; i < entries.length; ++i) {
+        // Only set if it isn't already (preserves ID, and any other attributes set)
+        if (to.get(entries[i].key) == null) {
+            log.warning("COPY ENTITY, key: {}, from: {}", [entries[i].key, entries[i].value.data.toString()]);
+            to.set(entries[i].key, entries[i].value);
+        }
+    }
+
+    return to;
 }

@@ -1,13 +1,30 @@
 import { ethereum, Address, BigInt, Bytes, BigDecimal } from "@graphprotocol/graph-ts";
-import { Erc20Fill, Erc20FillTypeSummary, Erc20FillTypeSummaryData } from "../../generated/schema";
+import {
+    DailyErc20FillTypeSummaryData,
+    Erc20Fill,
+    Erc20FillTypeSummary,
+    Erc20FillTypeSummaryData,
+    WeeklyErc20FillTypeSummaryData,
+} from "../../generated/schema";
 import { getOrCreateTransaction } from "./transaction";
 import { getOrCreateErc20Token, updateErc20TokenDataForErc20FillAndGetDerivedFillAmountUsd } from "./erc20Token";
 import { getOrCreateAccount, updateAccountDataForErc20Fill } from "./account";
 import { getOrCreateErc20TokenPair, updateErc20TokenPairData } from "./erc20TokenPair";
 import { getTokenAddressWhitelist } from "../common/networkSpecific";
-import { Erc20FillRole, ONE_BI, UniqueUserUsageId, ZERO_BD, ZERO_BI } from "../common/constants";
+import {
+    EXCLUDE_HISTORICAL_DATA,
+    Erc20FillRole,
+    ONE_BI,
+    SECONDS_PER_DAY,
+    SECONDS_PER_HOUR,
+    SECONDS_PER_WEEK,
+    SECONDS_PER_YEAR,
+    UniqueUserUsageId,
+    ZERO_BD,
+    ZERO_BI,
+} from "../common/constants";
 import { getOrCreateProtocol, updateProtocolDataForErc20Fill } from "./protocol";
-import { isUniqueUser } from "../common/utils";
+import { copyEntity, isUniqueUser } from "../common/utils";
 
 export function createErc20Fill(
     type: string,
@@ -162,4 +179,52 @@ function updateErc20FillTypeSummaryData(type: string, volumeUsd: BigDecimal, eve
     }
 
     data.save();
+
+    createErc20FillTypeSummarySnapshotsIfNecessary(summary, data, event);
+}
+
+function createErc20FillTypeSummarySnapshotsIfNecessary(
+    fillTypeSummary: Erc20FillTypeSummary,
+    data: Erc20FillTypeSummaryData,
+    event: ethereum.Event
+): void {
+    if (EXCLUDE_HISTORICAL_DATA) {
+        return;
+    }
+
+    const hour = event.block.timestamp.div(SECONDS_PER_HOUR);
+    const day = event.block.timestamp.div(SECONDS_PER_DAY);
+    const week = event.block.timestamp.div(SECONDS_PER_WEEK);
+
+    const hourlyId = fillTypeSummary.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(hour)));
+    const dailyId = fillTypeSummary.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(day)));
+    const weeklyId = fillTypeSummary.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(week)));
+
+    let dailyData = DailyErc20FillTypeSummaryData.load(dailyId);
+    let weeklyData = WeeklyErc20FillTypeSummaryData.load(weeklyId);
+
+    if (!dailyData || !weeklyData) {
+        const dataId = hourlyId;
+        const dataSnapshot = copyEntity(data, new Erc20FillTypeSummaryData(dataId));
+
+        dataSnapshot.save();
+
+        if (!dailyData) {
+            dailyData = new DailyErc20FillTypeSummaryData(dailyId);
+            dailyData.day = day;
+            dailyData.timestamp = event.block.timestamp;
+            dailyData.fillTypeSummary = fillTypeSummary.id;
+            dailyData.data = dataSnapshot.id;
+            dailyData.save();
+        }
+
+        if (!weeklyData) {
+            weeklyData = new WeeklyErc20FillTypeSummaryData(weeklyId);
+            weeklyData.week = week;
+            weeklyData.timestamp = event.block.timestamp;
+            weeklyData.fillTypeSummary = fillTypeSummary.id;
+            weeklyData.data = dataSnapshot.id;
+            weeklyData.save();
+        }
+    }
 }

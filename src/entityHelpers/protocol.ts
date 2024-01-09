@@ -1,7 +1,17 @@
-import { BigDecimal, Bytes, ethereum } from "@graphprotocol/graph-ts";
-import { Protocol, ProtocolData, _ActiveUser } from "../../generated/schema";
-import { ONE_BI, UniqueUserUsageId, ZERO_BD, ZERO_BI } from "../common/constants";
-import { isUniqueUser } from "../common/utils";
+import { BigDecimal, Bytes, dataSource, ethereum } from "@graphprotocol/graph-ts";
+import { DailyProtocolData, Protocol, ProtocolData, WeeklyProtocolData, _ActiveUser } from "../../generated/schema";
+import {
+    EXCLUDE_HISTORICAL_DATA,
+    ONE_BI,
+    SECONDS_PER_BLOCK,
+    SECONDS_PER_DAY,
+    SECONDS_PER_HOUR,
+    SECONDS_PER_WEEK,
+    UniqueUserUsageId,
+    ZERO_BD,
+    ZERO_BI,
+} from "../common/constants";
+import { copyEntity, isUniqueUser } from "../common/utils";
 
 const PROTOCOL_ID = Bytes.fromHexString("0x00");
 
@@ -65,5 +75,42 @@ export function updateProtocolDataForNftFill(fillAmountUsd: BigDecimal, event: e
 }
 
 function createProtocolDataSnapshotsIfNecessary(data: ProtocolData, event: ethereum.Event): void {
-    // TODO
+    if (EXCLUDE_HISTORICAL_DATA) {
+        return;
+    }
+
+    const hour = event.block.timestamp.div(SECONDS_PER_HOUR);
+    const day = event.block.timestamp.div(SECONDS_PER_DAY);
+    const week = event.block.timestamp.div(SECONDS_PER_WEEK);
+
+    const hourlyId = data.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(hour)));
+    const dailyId = data.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(day)));
+    const weeklyId = data.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(week)));
+
+    let dailyData = DailyProtocolData.load(dailyId);
+    let weeklyData = WeeklyProtocolData.load(weeklyId);
+
+    if (!dailyData || !weeklyData) {
+        const dataId = hourlyId;
+        const dataSnapshot = copyEntity(data, new ProtocolData(dataId));
+        dataSnapshot.save();
+
+        if (!dailyData) {
+            dailyData = new DailyProtocolData(dailyId);
+            dailyData.day = day;
+            dailyData.timestamp = event.block.timestamp;
+            dailyData.protocol = getOrCreateProtocol(event).id;
+            dailyData.data = dataSnapshot.id;
+            dailyData.save();
+        }
+
+        if (!weeklyData) {
+            weeklyData = new WeeklyProtocolData(weeklyId);
+            weeklyData.week = week;
+            weeklyData.timestamp = event.block.timestamp;
+            weeklyData.protocol = getOrCreateProtocol(event).id;
+            weeklyData.data = dataSnapshot.id;
+            weeklyData.save();
+        }
+    }
 }
