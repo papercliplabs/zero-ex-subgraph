@@ -186,8 +186,8 @@ type Erc20TokenData @entity {
     "Number of Nft fills this token is part of"
     nftFillCount: BigInt!
 
-    "Derived token price in ETH"
-    derivedPriceInEth: BigDecimal!
+    "Derived token price in Native token"
+    derivedPriceInNative: BigDecimal!
     "Derived token price in USD"
     derivedPriceInUsd: BigDecimal!
 }

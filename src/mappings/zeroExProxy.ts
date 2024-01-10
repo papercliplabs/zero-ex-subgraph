@@ -7,7 +7,7 @@ import {
     RfqOrderFilled as RfqOrderFilledEvent,
     TransformedERC20 as TransformedERC20Event,
 } from "../../generated/ZeroExProxy/ZeroExProxy";
-import { ETH_ADDRESS, Erc20FillType, NftCollectionType, ZERO_ADDRESS, ZERO_BI } from "../common/constants";
+import { NATIVE_ADDRESS, Erc20FillType, NftCollectionType, ZERO_ADDRESS, ZERO_BI } from "../common/constants";
 import { createErc20Fill } from "../entityHelpers/erc20Fill";
 import { findMatchingErc20Transfer } from "../common/utils";
 import { Address, log } from "@graphprotocol/graph-ts";
@@ -91,7 +91,7 @@ export function handleLiquidityProviderSwap(event: LiquidityProviderSwapEvent): 
         event
     );
 
-    if (ZERO_ADDRESS.equals(sender) && ETH_ADDRESS.notEqual(event.params.inputToken)) {
+    if (ZERO_ADDRESS.equals(sender) && NATIVE_ADDRESS.notEqual(event.params.inputToken)) {
         log.warning("Unable to find sender for zeroExProxy.handleLiquidityProviderSwap: {} - {}", [
             event.transaction.hash.toHexString(),
             event.logIndex.toString(),

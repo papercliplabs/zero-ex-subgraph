@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: ZeroExProxy
-    network: mainnet
+    network: base
     source:
       abi: ZeroExProxy
       address: "0xdef1c0ded9bec7f1a1670819833240f027b25eff"
-      startBlock: 10247094
+      startBlock: 1410394
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -50,11 +50,11 @@ dataSources:
       file: ./src/mappings/zeroExProxy.ts
   - kind: ethereum
     name: FlashWallet
-    network: mainnet
+    network: base
     source:
       abi: FlashWallet
-      address: "0x22f9dcf4647084d6c31b2765f6910cd85c178c18"
-      startBlock: 10286653
+      address: "0xdb6f1920a889355780af7570773609bd8cb1f498"
+      startBlock: 1410394
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -74,11 +74,11 @@ dataSources:
       file: ./src/mappings/flashWallet.ts
   - kind: ethereum
     name: UniswapV2Factory
-    network: mainnet
+    network: base
     source:
       abi: UniswapV2FactoryLike
-      address: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"
-      startBlock: 10000835
+      address: "0x0000000000000000000000000000000000000000"
+      startBlock: 1410394
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -98,11 +98,11 @@ dataSources:
       file: ./src/mappings/uniswapV2Like.ts
   - kind: ethereum
     name: SushiSwapFactory
-    network: mainnet
+    network: base
     source:
       abi: UniswapV2FactoryLike
-      address: "0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac"
-      startBlock: 10794229
+      address: "0x71524B4f93c58fcbF659783284E38825f0622859"
+      startBlock: 2631214
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -122,11 +122,11 @@ dataSources:
       file: ./src/mappings/uniswapV2Like.ts
   - kind: ethereum
     name: PancakeSwapFactory
-    network: mainnet
+    network: base
     source:
       abi: UniswapV2FactoryLike
-      address: "0x1097053Fd2ea711dad45caCcc45EfF7548fCB362"
-      startBlock: 15614590
+      address: "0x02a84c1b3BBD7401a5f7fa98a384EBC70bB5749E"
+      startBlock: 2910387
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -146,11 +146,11 @@ dataSources:
       file: ./src/mappings/uniswapV2Like.ts
   - kind: ethereum
     name: UniswapV3Factory
-    network: mainnet
+    network: base
     source:
       abi: UniswapV3Factory
-      address: "0x1F98431c8aD98523631AE4a59f267346ea31F984"
-      startBlock: 12369621
+      address: "0x33128a8fC17869897dcE68Ed026d694621f6FDfD"
+      startBlock: 1371680
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -171,7 +171,7 @@ dataSources:
 templates:
   - kind: ethereum
     name: UniswapV2PairLike
-    network: mainnet
+    network: base
     source:
       abi: UniswapV2PairLike
     mapping:
@@ -193,7 +193,7 @@ templates:
       file: ./src/mappings/uniswapV2Like.ts
   - kind: ethereum
     name: UniswapV3Pool
-    network: mainnet
+    network: base
     source:
       abi: UniswapV3Pool
     mapping:

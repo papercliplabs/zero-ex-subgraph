@@ -1,6 +1,6 @@
 import { Bytes, ethereum, log as logger } from "@graphprotocol/graph-ts";
 import { Erc20Transfer } from "../../generated/schema";
-import { ETH_ADDRESS, ONE_BI, TRANSFER_EVENT_SIGNATURE, ZERO_BI } from "../common/constants";
+import { NATIVE_ADDRESS, ONE_BI, TRANSFER_EVENT_SIGNATURE, ZERO_BI } from "../common/constants";
 import { getOrCreateErc20Token } from "./erc20Token";
 import { getOrCreateAccount } from "./account";
 
@@ -21,7 +21,7 @@ export function createErc20TransfersFromReceipt(event: ethereum.Event): Erc20Tra
         const transfer = new Erc20Transfer(id);
         transfer.transaction = event.transaction.hash;
         transfer.logIndex = ONE_BI.neg(); // Use -1 for log index for this (its not really part of the logs)
-        transfer.token = getOrCreateErc20Token(ETH_ADDRESS, event).id;
+        transfer.token = getOrCreateErc20Token(NATIVE_ADDRESS, event).id;
         transfer.from = getOrCreateAccount(event.transaction.from, event).id;
         transfer.to = getOrCreateAccount(event.transaction.to!, event).id;
         transfer.amount = event.transaction.value;

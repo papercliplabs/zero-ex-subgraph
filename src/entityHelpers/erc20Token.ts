@@ -10,7 +10,7 @@ import { Erc20 as Erc20Contract } from "../../generated/FlashWallet/Erc20";
 import { ChainlinkPriceFeed as ChainlinkPriceFeedContract } from "../../generated/FlashWallet/ChainlinkPriceFeed";
 import {
     CHAINLINK_PRICE_FEED_FACTOR,
-    ETH_ADDRESS,
+    NATIVE_ADDRESS,
     EXCLUDE_HISTORICAL_DATA,
     ONE_BD,
     ONE_BI,
@@ -21,9 +21,9 @@ import {
     ZERO_BI,
 } from "../common/constants";
 import {
-    getChainlinkEthToUsdPriceFeedAddress,
+    getChainlinkNativeToUsdPriceFeedAddress,
     getTokenAddressWhitelist,
-    getWrappedNativeAssetAddress,
+    getWrappedNativeAddress,
 } from "../common/networkSpecific";
 import { getOrCreateErc20TokenPair } from "./erc20TokenPair";
 import { bigIntMin, copyEntity, formatUnits } from "../common/utils";
@@ -40,7 +40,7 @@ export function getOrCreateErc20Token(address: Address, event: ethereum.Event): 
         token.address = address;
 
         // 0x uses special address to native ETH
-        if (address.equals(ETH_ADDRESS)) {
+        if (address.equals(NATIVE_ADDRESS)) {
             token.name = "Native Asset";
             token.symbol = "ETH";
             token.decimals = 18;
@@ -76,7 +76,7 @@ export function getOrCreateErc20Token(address: Address, event: ethereum.Event): 
         data.nftFillVolumeUsd = ZERO_BD;
         data.nftFillCount = ZERO_BI;
 
-        data.derivedPriceInEth = ZERO_BD;
+        data.derivedPriceInNative = ZERO_BD;
         data.derivedPriceInUsd = ZERO_BD;
 
         data.save();
@@ -133,11 +133,11 @@ function updateErc20TokenDerivedEthPrice(token: Erc20Token, data: Erc20TokenData
     let maxBlock = ZERO_BI;
 
     if (
-        Address.fromBytes(token.address).equals(ETH_ADDRESS) ||
-        Address.fromBytes(token.address).equals(getWrappedNativeAssetAddress())
+        Address.fromBytes(token.address).equals(NATIVE_ADDRESS) ||
+        Address.fromBytes(token.address).equals(getWrappedNativeAddress())
     ) {
-        // It is ETH or WETH, set to 1 and put as this block
-        data.derivedPriceInEth = ONE_BD;
+        // It is native or wrapped native, set to 1 and put as this block
+        data.derivedPriceInNative = ONE_BD;
         token.lastDerivedPriceBlock = event.block.number;
     } else {
         for (let i = 0; i < tokenAddressWhitelist.length; i++) {
@@ -165,7 +165,7 @@ function updateErc20TokenDerivedEthPrice(token: Erc20Token, data: Erc20TokenData
         );
         const maxBlockPairData = Erc20TokenPairData.load(maxBlockPair.id)!; // Guaranteed to exist;
         const maxBlockWhitelistTokenData = Erc20TokenData.load(maxBlockWhitelistToken.id)!; // Guaranteed to exist
-        data.derivedPriceInEth = maxBlockWhitelistTokenData.derivedPriceInEth.times(
+        data.derivedPriceInNative = maxBlockWhitelistTokenData.derivedPriceInNative.times(
             Address.fromBytes(maxBlockPair.tokenA).equals(maxBlockWhitelistToken.address)
                 ? maxBlockPairData.exchangeRateBtoA
                 : maxBlockPairData.exchangeRateAtoB
@@ -174,11 +174,19 @@ function updateErc20TokenDerivedEthPrice(token: Erc20Token, data: Erc20TokenData
         token.lastDerivedPriceBlock = maxBlock;
     }
 
-    // Fetch ETH -> USD conversion from chainlink price feed
-    const ethToUsdPriceFeedContract = ChainlinkPriceFeedContract.bind(getChainlinkEthToUsdPriceFeedAddress());
-    const latestRoundData = ethToUsdPriceFeedContract.latestRoundData();
-    const ethToUsdPrice = latestRoundData.value1.toBigDecimal().div(CHAINLINK_PRICE_FEED_FACTOR);
-    data.derivedPriceInUsd = data.derivedPriceInEth.times(ethToUsdPrice);
+    // Fetch Native -> USD conversion from chainlink price feed
+    const nativeToUsdPriceFeedContract = ChainlinkPriceFeedContract.bind(getChainlinkNativeToUsdPriceFeedAddress());
+    const latestRoundData = nativeToUsdPriceFeedContract.try_latestRoundData();
+
+    if (latestRoundData.reverted) {
+        // Can happen if price feed is deployed after 0x protocol, will miss prices between 0x deployment and price feed deployment in that case
+        // Happens with optimism
+        // TODO: better solution to ^?
+        log.warning("updateErc20TokenDerivedEthPrice: try_latestRoundData reverted", []);
+    } else {
+        const nativeToUsdPrice = latestRoundData.value.value1.toBigDecimal().div(CHAINLINK_PRICE_FEED_FACTOR);
+        data.derivedPriceInUsd = data.derivedPriceInNative.times(nativeToUsdPrice);
+    }
 }
 
 export function updateErc20TokenDataForNftFillAndGetDerivedFillAmountUsd(

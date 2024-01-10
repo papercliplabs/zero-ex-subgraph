@@ -1,6 +1,6 @@
 import { Address, log } from "@graphprotocol/graph-ts";
 import { BridgeFill as BridgeFillEvent } from "../../generated/FlashWallet/FlashWallet";
-import { ETH_ADDRESS, Erc20FillType, ZERO_ADDRESS, ZERO_BI } from "../common/constants";
+import { NATIVE_ADDRESS, Erc20FillType, ZERO_ADDRESS, ZERO_BI } from "../common/constants";
 import { createErc20Fill } from "../entityHelpers/erc20Fill";
 import { findMatchingErc20Transfer } from "../common/utils";
 import { getFlashWalletAddress } from "../common/networkSpecific";
@@ -48,7 +48,7 @@ export function handleBridgeFill(event: BridgeFillEvent): void {
         event
     );
 
-    if (ZERO_ADDRESS.equals(filler) && ETH_ADDRESS.notEqual(event.params.inputToken)) {
+    if (ZERO_ADDRESS.equals(filler) && NATIVE_ADDRESS.notEqual(event.params.inputToken)) {
         log.warning("Unable to find filler for flashWallet.handleBridgeFill: {} - {}", [
             event.transaction.hash.toHexString(),
             event.logIndex.toString(),

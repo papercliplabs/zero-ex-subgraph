@@ -4,44 +4,31 @@
 
 ## Table of Contents
 
-- [0x Protocol Community Subgraph](#0x-protocol-community-subgraph)
-	- [Table of Contents](#table-of-contents)
-	- [Subgraph Deployments](#subgraph-deployments)
-	- [Usage Notes](#usage-notes)
-	- [Block Diagrams](#block-diagrams)
-		- [Order Types and Events](#order-types-and-events)
-		- [Contract Contexts](#contract-contexts)
-		- [Contract Source Spawning](#contract-source-spawning)
-		- [Multiplex](#multiplex)
-			- [BatchSell](#batchsell)
-			- [MultiHopSell](#multihopsell)
-		- [Token Flows](#token-flows)
-			- [NativeOrder](#nativeorder)
-			- [OptimizedSwap](#optimizedswap)
-			- [Transform Erc20](#transform-erc20)
-			- [Plugable Liquidity Provider](#plugable-liquidity-provider)
-	- [Development](#development)
-		- [Grafting](#grafting)
-		- [Contract Addresses](#contract-addresses)
-	- [Validation](#validation)
-
+-   [0x Protocol Community Subgraph](#0x-protocol-community-subgraph) - [Table of Contents](#table-of-contents) - [Subgraph Deployments](#subgraph-deployments) - [Usage Notes](#usage-notes) - [Block Diagrams](#block-diagrams) - [Order Types and Events](#order-types-and-events) - [Contract Contexts](#contract-contexts) - [Contract Source Spawning](#contract-source-spawning) - [Multiplex](#multiplex) - [BatchSell](#batchsell) - [MultiHopSell](#multihopsell) - [Token Flows](#token-flows) - [NativeOrder](#nativeorder) - [OptimizedSwap](#optimizedswap) - [Transform Erc20](#transform-erc20) - [Plugable Liquidity Provider](#plugable-liquidity-provider) - [Development](#development) - [Grafting](#grafting) - [Contract Addresses](#contract-addresses) - [Validation](#validation)
 
 ## Subgraph Deployments
 
-| Blockchain Network | The Graph Hosted                                                                                   | The Graph Decentralized | Alchemy |
-| ------------------ | -------------------------------------------------------------------------------------------------- | ----------------------- | ------- |
-| Ethereum Mainnet   | [Mainnet Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-mainnet)   | TODO                    | TODO    |
-| Optimism           | [Optimism Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-optimism) | TODO                    | TODO    |
+| Blockchain Network | The Graph Hosted                                                                                     | The Graph Decentralized | Alchemy |
+| ------------------ | ---------------------------------------------------------------------------------------------------- | ----------------------- | ------- |
+| Ethereum Mainnet   | [Mainnet Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-mainnet)     | TODO                    | TODO    |
+| Optimism           | [Optimism Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-optimism)   | TODO                    | TODO    |
+| Arbitrum           | [Arbitrum Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-arbitrum)   | TODO                    | TODO    |
+| Base               | Not supported                                                                                        | TODO                    | TODO    |
+| Polygon            | [Polygon Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-polygon)     | TODO                    | TODO    |
+| BNB                | [BNB Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-bnb)             | TODO                    | TODO    |
+| Avalanche          | [Avalanche Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-avalanche) | TODO                    | TODO    |
+| Fantom             | [Fantom Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-fantom)       | TODO                    | TODO    |
+| Celo               | [Celo Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-celo)           | TODO                    | TODO    |
 
 ## Usage Notes
 
--   One limitation of subgraphs is the inability to track native asset transfers (ETH) in internal calls. This means we cannot accurately do accounting of complex swaps which use ETH during or at the end of the swap. 
+-   One limitation of subgraphs is the inability to track native asset transfers (ETH) in internal calls. This means we cannot accurately do accounting of complex swaps which use ETH during or at the end of the swap.
 -   We try our best to infer the sender, filler and recipient for each fill when they are not provided by an event, but sometimes it is not possible. This occurs for example, in cases where:
     -   An ERC20 doesn't emit Transfer event
-	-   During LiquidityProviderSwap when the input token is ETH
-	-   During BridgeFills when the input token is ETH, and the output token gets minted (for example, ETH -> cETHv3)
-- TODO: add note about how derived prices work
-- TODO: add a note about assembling full swaps
+    -   During LiquidityProviderSwap when the input token is ETH
+    -   During BridgeFills when the input token is ETH, and the output token gets minted (for example, ETH -> cETHv3)
+-   TODO: add note about how derived prices work
+-   TODO: add a note about assembling full swaps
 
 ## Block Diagrams
 
@@ -221,7 +208,7 @@ graph TD
 
 ## Development
 
-> Any <network> below is to be replaced with one of the supported networks: `[mainnet, optimism]`
+> Any <network> below is to be replaced with one of the supported networks: `[mainnet, optimism, arbitrum, base, polygon, bnb, avalanche, fantom, celo]`
 
 Install dependencies
 

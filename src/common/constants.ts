@@ -2,7 +2,7 @@ import { Address, BigDecimal, BigInt, ByteArray, Bytes, crypto } from "@graphpro
 
 export const ZERO_ADDRESS = Address.fromString("0x0000000000000000000000000000000000000000");
 
-export const ETH_ADDRESS = Address.fromString("0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"); // 0x uses this for ETH
+export const NATIVE_ADDRESS = Address.fromString("0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"); // 0x uses this for ETH
 
 export const DAYS_PER_YEAR: BigInt = BigInt.fromString("365");
 export const SECONDS_PER_HOUR: BigInt = BigInt.fromString("3600");
