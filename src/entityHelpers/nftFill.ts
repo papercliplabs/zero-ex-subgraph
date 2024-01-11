@@ -1,8 +1,8 @@
 import { Address, BigInt, Bytes, ethereum } from "@graphprotocol/graph-ts";
 import { NftFill } from "../../generated/schema";
 import { getOrCreateTransaction } from "./transaction";
-import { NftFillDirection } from "../common/constants";
-import { getOrCreateAccount } from "./account";
+import { NftFillDirection, ZERO_BD } from "../common/constants";
+import { getOrCreateAccount, updateAccountDataForNftFill } from "./account";
 import { getOrCreateErc20Token, updateErc20TokenDataForNftFillAndGetDerivedFillAmountUsd } from "./erc20Token";
 import { getOrCreateNftCollection, updateNftCollectionDataForNftFill } from "./nftCollection";
 import { getOrCreateNft } from "./nft";
@@ -61,4 +61,18 @@ export function createNftFill(
 
     // Update nft collection data
     updateNftCollectionDataForNftFill(nftAddress, type, erc20TokenAmountUsd, event);
+
+    // Update account
+    updateAccountDataForNftFill(
+        maker,
+        true,
+        fill.direction == NftFillDirection.Sell ? ZERO_BD : erc20TokenAmountUsd,
+        event
+    );
+    updateAccountDataForNftFill(
+        taker,
+        false,
+        fill.direction == NftFillDirection.Sell ? erc20TokenAmountUsd : ZERO_BD,
+        event
+    );
 }

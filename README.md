@@ -8,17 +8,17 @@
 
 ## Subgraph Deployments
 
-| Blockchain Network | The Graph Hosted                                                                                     | The Graph Decentralized | Alchemy |
-| ------------------ | ---------------------------------------------------------------------------------------------------- | ----------------------- | ------- |
-| Ethereum Mainnet   | [Mainnet Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-mainnet)     | TODO                    | TODO    |
-| Optimism           | [Optimism Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-optimism)   | TODO                    | TODO    |
-| Arbitrum           | [Arbitrum Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-arbitrum)   | TODO                    | TODO    |
-| Base               | Not supported                                                                                        | TODO                    | TODO    |
-| Polygon            | [Polygon Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-polygon)     | TODO                    | TODO    |
-| BNB                | [BNB Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-bnb)             | TODO                    | TODO    |
-| Avalanche          | [Avalanche Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-avalanche) | TODO                    | TODO    |
-| Fantom             | [Fantom Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-fantom)       | TODO                    | TODO    |
-| Celo               | [Celo Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-celo)           | TODO                    | TODO    |
+| Blockchain Network | The Graph Hosted                                                                                     | The Graph Decentralized              | Alchemy |
+| ------------------ | ---------------------------------------------------------------------------------------------------- | ------------------------------------ | ------- |
+| Ethereum Mainnet   | [Mainnet Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-mainnet)     | TODO                                 | TODO    |
+| Optimism           | [Optimism Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-optimism)   | TODO                                 | TODO    |
+| Arbitrum           | [Arbitrum Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-arbitrum)   | TODO                                 | TODO    |
+| Base               | [Base Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-base)           | TODO                                 | TODO    |
+| Polygon            | [Polygon Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-polygon)     | TODO                                 | TODO    |
+| BNB                | [BNB Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-bnb)             | TODO: issue deploying, not Supported | TODO    |
+| Avalanche          | [Avalanche Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-avalanche) | TODO                                 | TODO    |
+| Fantom             | [Fantom Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-fantom)       | TODO                                 | TODO    |
+| Celo               | [Celo Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-celo)           | TODO: issues deploying               | TODO    |
 
 ## Usage Notes
 
@@ -240,7 +240,7 @@ Deploy to the hosted network
 yarn deploy-hosted:<network>
 ```
 
-Deploy to the subgraph studio
+Deploy to the subgraph studio (version controlled with STUDIO_VERSION in .env)
 
 ```
 yarn deploy-studio:<network>
@@ -249,10 +249,13 @@ yarn deploy-studio:<network>
 Codegen, build and deploy everywhere in one command
 
 ```
-yarn auto-deploy:<network> v<version (X.Y.Z)>
+yarn auto-deploy:<network>
+```
 
-# Example
-yarn auto-deploy:mainnet v0.0.2
+Autodeploy to hosted and studio for all networks
+
+```
+yarn auto-deploy:all
 ```
 
 Local mainnet development
@@ -263,6 +266,9 @@ yarn create-local
 
 # Deploy
 yarn deploy-local
+
+# Remove
+yarn remove-local
 ```
 
 ### Grafting

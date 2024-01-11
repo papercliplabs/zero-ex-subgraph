@@ -20,6 +20,11 @@ export function getOrCreateAccount(address: Address, event: ethereum.Event): Acc
         data.erc20FillSourceCount = ZERO_BI;
         data.erc20FillFillerCount = ZERO_BI;
         data.erc20FillDestinationCount = ZERO_BI;
+
+        data.nftFillMakerCount = ZERO_BI;
+        data.nftFillTakerCount = ZERO_BI;
+        data.nftFillErc20VolumePaidUsd = ZERO_BD;
+
         data.save();
 
         account.data = data.id;
@@ -57,18 +62,18 @@ export function updateAccountDataForErc20Fill(
 export function updateAccountDataForNftFill(
     address: Address,
     maker: boolean,
-    erc20VolumeUsd: BigDecimal,
+    erc20VolumePaidUsd: BigDecimal,
     event: ethereum.Event
 ): void {
     const account = getOrCreateAccount(address, event);
     const data = AccountData.load(account.id)!; // Guaranteed to exist
 
     if (maker) {
-        data.nftFillErc20VolumeUsd = data.nftFillErc20VolumeUsd.plus(erc20VolumeUsd);
+        data.nftFillErc20VolumePaidUsd = data.nftFillErc20VolumePaidUsd.plus(erc20VolumePaidUsd);
         data.nftFillMakerCount = data.nftFillMakerCount.plus(ONE_BI);
     } else {
         // taker
-        data.nftFillErc20VolumeUsd = data.nftFillErc20VolumeUsd.plus(erc20VolumeUsd);
+        data.nftFillErc20VolumePaidUsd = data.nftFillErc20VolumePaidUsd.plus(erc20VolumePaidUsd);
         data.nftFillTakerCount = data.nftFillTakerCount.plus(ONE_BI);
     }
 

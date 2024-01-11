@@ -108,8 +108,8 @@ type AccountData @entity {
     nftFillMakerCount: BigInt!
     "Number of nft fills this account was the taker for"
     nftFillTakerCount: BigInt!
-    "Volume in USD of the nft fill erc20 values"
-    nftFillErc20VolumeUsd: BigDecimal!
+    "Volume in USD of the nft fill erc20 values paid by the account"
+    nftFillErc20VolumePaidUsd: BigDecimal!
 }
 
 type _ActiveUser @entity {
