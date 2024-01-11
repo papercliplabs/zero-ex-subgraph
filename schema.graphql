@@ -2,7 +2,7 @@
 # Protocol
 ####
 
-type Protocol @entity {
+type Protocol @entity(immutable: true) {
     "Hardcoded 0, singleton"
     id: Bytes!
 
@@ -60,7 +60,7 @@ type ProtocolData @entity {
 # Account
 ####
 
-type Account @entity {
+type Account @entity(immutable: true) {
     "Address"
     id: Bytes!
 
@@ -104,7 +104,12 @@ type AccountData @entity {
     "Number of erc20 fills this account was the destination of"
     erc20FillDestinationCount: BigInt!
 
-    # TODO: nft fill counts!
+    "Number of nft fills this account was the maker for"
+    nftFillMakerCount: BigInt!
+    "Number of nft fills this account was the taker for"
+    nftFillTakerCount: BigInt!
+    "Volume in USD of the nft fill erc20 values"
+    nftFillErc20VolumeUsd: BigDecimal!
 }
 
 type _ActiveUser @entity {
@@ -344,7 +349,7 @@ enum NftCollectionType {
     Erc1155
 }
 
-type NftCollection @entity {
+type NftCollection @entity(immutable: true) {
     "Address"
     id: Bytes!
 
@@ -387,7 +392,7 @@ type NftCollectionData @entity {
     averageFillPriceUsd: BigDecimal!
 }
 
-type Nft @entity {
+type Nft @entity(immutable: true) {
     "Collection address + tokenId"
     id: Bytes!
 
@@ -411,7 +416,7 @@ enum NftFillDirection {
     BUY
 }
 
-type NftFill @entity {
+type NftFill @entity(immutable: true) {
     "txn hash + log index"
     id: Bytes!
 
@@ -496,6 +501,7 @@ type Transaction @entity {
 }
 
 # Helper to derive sender and receiver where events are missing data, and also help reconstruct entire trades
+# Don't create entities like token, or account since they might not be actually part of the protocol (get made elsewhere if they are)
 type Erc20Transfer @entity(immutable: true) {
     "txn hash + log index"
     id: Bytes!
@@ -505,12 +511,12 @@ type Erc20Transfer @entity(immutable: true) {
     "Log index of the transfer event"
     logIndex: BigInt!
     "Token being transferred"
-    token: Erc20Token!
+    tokenAddress: Bytes!
 
     "Account the transfer is from"
-    from: Account! # TODO: make these just bytes (?)
+    fromAddress: Bytes!
     "Account the transfer is to"
-    to: Account! # TODO: make these just bytes (?)
+    toAddress: Bytes!
     "Amount of the transfer"
     amount: BigInt!
 }

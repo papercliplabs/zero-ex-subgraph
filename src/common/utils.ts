@@ -18,12 +18,12 @@ export function findMatchingErc20Transfer(
         const transfer = transfers[i];
 
         // Must be right token
-        if (transfer.token.notEqual(tokenAddress)) {
+        if (transfer.tokenAddress.notEqual(tokenAddress)) {
             continue;
         }
 
         // From or to was specified and didn't match
-        if ((from && transfer.from.notEqual(from)) || (to && transfer.to.notEqual(to))) {
+        if ((from && transfer.fromAddress.notEqual(from)) || (to && transfer.toAddress.notEqual(to))) {
             continue;
         }
 

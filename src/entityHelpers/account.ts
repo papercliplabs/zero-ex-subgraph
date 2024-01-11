@@ -53,3 +53,24 @@ export function updateAccountDataForErc20Fill(
 
     data.save();
 }
+
+export function updateAccountDataForNftFill(
+    address: Address,
+    maker: boolean,
+    erc20VolumeUsd: BigDecimal,
+    event: ethereum.Event
+): void {
+    const account = getOrCreateAccount(address, event);
+    const data = AccountData.load(account.id)!; // Guaranteed to exist
+
+    if (maker) {
+        data.nftFillErc20VolumeUsd = data.nftFillErc20VolumeUsd.plus(erc20VolumeUsd);
+        data.nftFillMakerCount = data.nftFillMakerCount.plus(ONE_BI);
+    } else {
+        // taker
+        data.nftFillErc20VolumeUsd = data.nftFillErc20VolumeUsd.plus(erc20VolumeUsd);
+        data.nftFillTakerCount = data.nftFillTakerCount.plus(ONE_BI);
+    }
+
+    data.save();
+}

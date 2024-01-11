@@ -39,9 +39,9 @@
         "deploy-hosted:celo": "source .env; graph deploy --node https://api.thegraph.com/deploy/ papercliplabs/0x-protocol-celo --access-token $HOSTED_ACCESS_TOKEN",
         "deploy-studio:celo": "source .env; graph deploy --studio 0x-protocol-celo --deploy-key $STUDIO_DEPLOY_KEY",
         "auto-deploy:celo": "yarn codegen; yarn build:celo; yarn deploy-hosted:celo; yarn deploy-studio:celo --version-label $1",
-        "create-local": "source .env; graph create --node http://${LOCAL_NODE_IP}:8020/ papercliplabs/0x-protocol-mainnet-no-op-his-test",
-        "remove-local": "source .env; graph remove --node http://${LOCAL_NODE_IP}:8020/ papercliplabs/0x-protocol-mainnet-no-op-his-test ",
-        "deploy-local": "source .env; graph deploy --node http://${LOCAL_NODE_IP}:8020/ --ipfs http://${LOCAL_NODE_IP}:5001 papercliplabs/0x-protocol-mainnet-no-op-his-test --version-label v0",
+        "create-local": "source .env; graph create --node http://${LOCAL_NODE_IP}:8020/ papercliplabs/0x-protocol-mainnet-full",
+        "remove-local": "source .env; graph remove --node http://${LOCAL_NODE_IP}:8020/ papercliplabs/0x-protocol-mainnet-full",
+        "deploy-local": "source .env; graph deploy --node http://${LOCAL_NODE_IP}:8020/ --ipfs http://${LOCAL_NODE_IP}:5001 papercliplabs/0x-protocol-mainnet-full --version-label v0",
         "test": "graph test"
     },
     "dependencies": {

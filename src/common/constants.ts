@@ -57,7 +57,7 @@ export const CHAINLINK_PRICE_FEED_FACTOR = BigDecimal.fromString("100000000"); /
 // Indexing params
 
 // If true, will ignore optimized swaps which are quite indexing intensive, this will significantly speed up indexing (at the cost of missing data)
-export const EXCLUDE_OPTIMIZED_SWAPS = true;
+export const EXCLUDE_OPTIMIZED_SWAPS = false;
 
 // If true, will not take historical snapshots, which are indexing intensive,
 export const EXCLUDE_HISTORICAL_DATA = false;

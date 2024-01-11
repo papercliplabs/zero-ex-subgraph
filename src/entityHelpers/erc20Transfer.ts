@@ -15,19 +15,19 @@ export function createErc20TransfersFromReceipt(event: ethereum.Event): Erc20Tra
 
     const transfers: Erc20Transfer[] = [];
 
-    // Add in the ETH input as an ERC20 transfer (native assets don't emit events, this is how we can track better)
-    if (event.transaction.value.gt(ZERO_BI) && event.transaction.to) {
-        const id = event.transaction.hash;
-        const transfer = new Erc20Transfer(id);
-        transfer.transaction = event.transaction.hash;
-        transfer.logIndex = ONE_BI.neg(); // Use -1 for log index for this (its not really part of the logs)
-        transfer.token = getOrCreateErc20Token(NATIVE_ADDRESS, event).id;
-        transfer.from = getOrCreateAccount(event.transaction.from, event).id;
-        transfer.to = getOrCreateAccount(event.transaction.to!, event).id;
-        transfer.amount = event.transaction.value;
-        transfer.save();
-        transfers.push(transfer);
-    }
+    // // Add in the ETH input as an ERC20 transfer (native assets don't emit events, this is how we can track better)
+    // if (event.transaction.value.gt(ZERO_BI) && event.transaction.to) {
+    //     const id = event.transaction.hash;
+    //     const transfer = new Erc20Transfer(id);
+    //     transfer.transaction = event.transaction.hash;
+    //     transfer.logIndex = ONE_BI.neg(); // Use -1 for log index for this (its not really part of the logs)
+    //     transfer.tokenAddress = getOrCreateErc20Token(NATIVE_ADDRESS, event).id;
+    //     transfer.from = getOrCreateAccount(event.transaction.from, event).id;
+    //     transfer.to = getOrCreateAccount(event.transaction.to!, event).id;
+    //     transfer.amount = event.transaction.value;
+    //     transfer.save();
+    //     transfers.push(transfer);
+    // }
 
     // Loop through all events, and add in all transfers
     for (let i = 0; i < receipt.logs.length; i++) {
@@ -49,9 +49,9 @@ export function createErc20TransfersFromReceipt(event: ethereum.Event): Erc20Tra
                     const transfer = new Erc20Transfer(id);
                     transfer.transaction = event.transaction.hash;
                     transfer.logIndex = log.logIndex;
-                    transfer.token = getOrCreateErc20Token(log.address, event).id;
-                    transfer.from = getOrCreateAccount(from.toAddress(), event).id;
-                    transfer.to = getOrCreateAccount(to.toAddress(), event).id;
+                    transfer.tokenAddress = log.address;
+                    transfer.fromAddress = from.toAddress();
+                    transfer.toAddress = to.toAddress();
                     transfer.amount = value.toBigInt();
                     transfer.save();
                     transfers.push(transfer);

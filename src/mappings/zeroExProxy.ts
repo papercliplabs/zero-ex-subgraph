@@ -73,7 +73,7 @@ export function handleLiquidityProviderSwap(event: LiquidityProviderSwapEvent): 
     // For example with metamask router it goes: initial_sender -> metamask_router -> zeroExProxy -> Provider,
     // the "sender" from the perspective of the fill is the metamask router, but event.transaction.from gives us the initial_sender.
     // Instead, we will leave as zero address when we can't determine it
-    const sender = inputTransfer ? Address.fromBytes(inputTransfer.from) : ZERO_ADDRESS;
+    const sender = inputTransfer ? Address.fromBytes(inputTransfer.fromAddress) : ZERO_ADDRESS;
 
     createErc20Fill(
         Erc20FillType.PlugableLiquidityProvider,

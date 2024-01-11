@@ -27,9 +27,9 @@ export function handleBridgeFill(event: BridgeFillEvent): void {
     // Corner case where we will still have ZERO_ADDRESS for the filler when ETH is the input, and a new asset gets minted (ex. liquid staking tokens)
     // But, technically speaking, in this case the zero address is "filling" the order, as that is the where the output tokens are coming from...
     const filler = flashWalletToFillerTransaction // If input is ETH won't find flashWalletToFillerTransaction
-        ? Address.fromBytes(flashWalletToFillerTransaction.to)
+        ? Address.fromBytes(flashWalletToFillerTransaction.toAddress)
         : fillerToFlashWalletTransaction
-        ? Address.fromBytes(fillerToFlashWalletTransaction.from) // Only get here if the input is ETH, which means the output is not. But, in cases where the output token gets minted, this will be the zero address
+        ? Address.fromBytes(fillerToFlashWalletTransaction.fromAddress) // Only get here if the input is ETH, which means the output is not. But, in cases where the output token gets minted, this will be the zero address
         : ZERO_ADDRESS;
 
     createErc20Fill(

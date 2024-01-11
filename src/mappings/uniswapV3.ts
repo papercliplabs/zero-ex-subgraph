@@ -8,6 +8,7 @@ import { EXCLUDE_OPTIMIZED_SWAPS, Erc20FillType, ZERO_ADDRESS, ZERO_BI } from ".
 import { createErc20Fill } from "../entityHelpers/erc20Fill";
 import { findMatchingErc20Transfer } from "../common/utils";
 import { UniswapV3Pool } from "../../generated/templates";
+import { getZeroExProxyAddress } from "../common/networkSpecific";
 
 export function handlePoolCreated(event: PoolCreatedEvent): void {
     // Spawn dynamic data source
@@ -16,12 +17,8 @@ export function handlePoolCreated(event: PoolCreatedEvent): void {
     }
 }
 
-const ZERO_EX_PROXY_ADDRESS = Address.fromString("0xdef1c0ded9bec7f1a1670819833240f027b25eff");
-
 export function handleSwap(event: SwapEvent): void {
-    // TODO: removed for now to benchmark
-    // if (event.params.sender.notEqual(getZeroExProxyAddress())) {
-    if (event.params.sender.notEqual(ZERO_EX_PROXY_ADDRESS)) {
+    if (event.params.sender.notEqual(getZeroExProxyAddress())) {
         // Only care about swap from 0x
         return;
     } else {
@@ -46,7 +43,7 @@ export function handleSwap(event: SwapEvent): void {
         );
 
         // From 0x, all transfers into the pools for optimized swaps will be in ERC20 tokens only (wraps / unwraps happen in zeroExProxy). So, this should never fail to find the sender
-        const sender = inputTransfer ? Address.fromBytes(inputTransfer.from) : ZERO_ADDRESS; // If all else fails, leave empty...
+        const sender = inputTransfer ? Address.fromBytes(inputTransfer.fromAddress) : ZERO_ADDRESS; // If all else fails, leave empty...
 
         createErc20Fill(
             Erc20FillType.OptimizedUniswapV3,
