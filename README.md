@@ -44,15 +44,32 @@
 
 -   One limitation of subgraphs is the inability to track native asset transfers (ex. ETH) in internal calls. This means we cannot accurately do accounting of complex swaps which use native assets during or at the end of the swap.
 -   We try our best to infer the sender, filler and recipient for each fill when they are not provided by an event, but sometimes it is not possible. This occurs for example, in cases where:
-    -   An ERC20 doesn't emit Transfer event
-    -   During LiquidityProviderSwap when the input token is ETH
+    -   An ERC20 doesn't emit Transfer events, or the event doesn't not conform to the ERC20 standard
+    -   During LiquidityProviderSwap when the input token is the native asset. 
     -   During BridgeFills when the input token is ETH, and the output token gets minted (for example, ETH -> cETHv3)
 - Due the the limitations of internal call native asset tracking mentioned above, we do not try to infer and assemble full swaps. Instead we provide all the fills for a transaction, and all erc20 transfer which happen within. It is possible for the querier to assemble the entire swap using this data and a 3rd party source to fill in the native transfer blanks.
 -   Derived prices:
     -   Derived native asset (ex. ETH) prices are computed whenever an ERC20 fill occurs. For each token involved in the fill, the native asset price of the token is derived by looking at all token pairs with a whitelisted token (which can be assumed to have a reliable prices). Of these pairs, we find the whitelist token with the freshest native asset price and exchange rate to the token of interest. We then propagate the price through the pairs exchange rate to find the derived native asset price of the token of interest. 
     -  Derived USD prices are computed after the derived native asset price is computed by using a native asset / USD chainlink price feed.
     -  Due to the nature of how derived prices are computed, there can be a difference between the lastUpdatedBlock and the lastDerivedPriceBlock. When using derived prices, always consider lastDerivedPriceBlock to know how fresh the price is. 
+- ERC20 fill roles
+  - generalized to the following 3 roles and token flow
+	```mermaid 
+	graph TD
+		source --"input token"--> filler
+		filler --"output token"--> destination
+	```
+- In native orders:
+  	-  maker is the source
+  	-  maker token is the input token
+  	-  taker is the filler 
+  	-  taker token is the output token
+    -  it is possible that the input token doesn't actually go to the filler and instead to a recipient the filler specifies (ex batch RFQ orders), we don't explicitly try to derive this as it would require tracking and deriving another role in general (the input token recipient). See the note above about inferring roles where event data doesn't provide this information.
+- Erc20Fill.feeRecipient is only used for Limit orders, we cannot accurately track fee recipients for erc20Transforms due to no events being emitted. 
+- For erc20BridgeFills, the source and destination will always be the flash wallet. This is because the flash wallet is always the address that interacts with the bridge. From the perspective of the individual fill, this is accurate since the input tokens flow from the flash wallet to the filler, and the output tokens flow from filler to flash wallet. This information is what is required to assemble the entire swap for complex swaps (multihop, batch, and/or multiple transforms), see the note above about why we do not attempt to do this assembly at indexing time. 
 - This [Notebook](validation/query.ipynb) contains plots for historical data, this can be useful to help query and visualize the data from the subgraph
+
+
 
 ## Block Diagrams
 
@@ -60,10 +77,10 @@
 
 ```mermaid
 graph TD
-    P[0x Proxy v4] --> E[Erc20Swap]
-    P --> N[NftSwap]
-    E --> D[direct]
-    E --0xProxy::TransformedERC20--> T[TransformErc20]
+  	P[0x Proxy v4] --> E[Erc20Swap]
+  	P --> N[NftSwap]
+  	E --> D[direct]
+  	E --0xProxy::TransformedERC20--> T[TransformErc20]
 	D --> F[optimized]
 	F --UniswapV2Pair::Swap--> UniswapV2
 	F --SushiSwapPair::Swap--> SushiSwap
@@ -160,12 +177,17 @@ Note: OTC is the only one that supports filling in ETH directly, others can thro
 
 ```mermaid
 graph TD
-	subgraph A[ZeroExProxy as payer, supports ERC20 + ETH]
-		T[Taker] --ETH or ERC20--> Z[ZeroExProxy]
-		Z --ETH or / ERC20--> M[Maker]
-		M --ETH or ERC20--> R[Receipient]
+	subgraph C[ERC20 input, ETH output, OTC only]
+		TC[Taker] --ERC20--> MC[Maker]
+		MC --WETH--> ZC[ZeroExProxy]
+		ZC --ETH--> RC[Receipient]
 	end
-	subgraph B[Taker as payer, supports ERC20 only]
+	subgraph A[ETH input, ERC20 output, OTC only]
+		T[Taker] --ETH--> Z[ZeroExProxy]
+		Z --ETH--> M[Maker]
+		M --ERC20--> R[Receipient]
+	end
+	subgraph B[ERC20 input + output]
 		TB[Taker] --ERC20--> MB[Maker]
 		MB--ERC20--> RB[Receipient]
 	end
@@ -175,24 +197,24 @@ graph TD
 
 ```mermaid
 graph TD
-	subgraph B[ETH output]
+	subgraph ETH output
 		SB[sender] --"(1) ERC20"--> PB[Pools]
 		PB --"(2) ERC20"--> PB
 		PB --"(3) WETH"--> ZB[ZeroExProxy]
 		ZB[ZeroExProxy] <--"(4) WETH/ETH"--> WB[WETH]
-		ZB --"(5) ETH"--> SB
+		ZB --"(5) ETH"--> RB[Recipient]
 	end
-	subgraph A[ETH input]
+	subgraph ETH input
 		SA[sender] --"(1) ETH"--> ZA[ZeroExProxy]
 		ZA <--"(2) ETH / WETH"--> WA[WETH]
 		ZA --"(3) WETH"--> PA[Pools]
 		PA --"(4) ERC20"--> PA
-		PA --"(5) ERC20"--> SA
+		PA --"(5) ERC20"--> RA[Recipient]
 	end
-	subgraph C[ERC20 input and output]
+	subgraph ERC20 input and output 
 		SC[sender] --"(1) ERC20"--> PC[Pools]
 		PC --"(2) ERC20"--> PC
-		PC --"(3) ETH"--> SC
+		PC --"(3) ETH"--> RC[Recipient]
 	end
 ```
 
@@ -206,7 +228,7 @@ graph TD
 	F <--"(2: FillQuoteTransformer->fillBridge) ETH or ERC20"--> B[Bridge]
 	F <--"(2: FillQuoteTransformer->NativeOrder) ETH or ERC20"--> NativeOrderMaker
 	F <--"(2: WethTransformer) WETH / ETH"--> W[WETH]
-	F --"(3: AffiliateFeeTransformer)"----> FeeRecipient
+	F --"(3: AffiliateFeeTransformer) ETH or ERC20"----> FeeRecipient
 	F --"(3: PayTakerTransformer) ETH or ERC20"----> Recipient
 ```
 
@@ -220,8 +242,7 @@ graph TD
 	end
 	subgraph A[ETH input]
 		SA[Sender] --ETH--> ZA[ZeroExProxy]
-		ZA --ETH--> BA[PlpSandbox]
-		BA --ETH--> PA[Provider]
+		ZA --ETH--> PA[Provider]
 		PA --ERC20--> RA[Receipient]
 	end
 	subgraph C[ERC20 input and output]
@@ -317,5 +338,5 @@ graft:
 
 ## Validation
 
+- [Spreadsheet](https://docs.google.com/spreadsheets/d/1jWB7KghHDBUJVF08xxGYZ2URpdg9PqY1dRGmZZ--s6o/edit#gid=358122596): summarizes all validation
 - [Notebook](validation/query.ipynb): contains queries and plots of all historical data
-- Spreadsheet: TODO

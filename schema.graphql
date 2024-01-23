@@ -293,6 +293,10 @@ type Erc20Fill @entity(immutable: true) {
     "Amount of output tokens in the fill"
     outputTokenAmount: BigInt!
 
+    # TODO
+    # inputTokenAmountUsd: BigDecimal!
+    # outputTokenAmountUsd: BigDecimal!
+
     # Optional fee payed with the fill
     feeRecipient: Account!
     "Fee recipient amount in output tokens"

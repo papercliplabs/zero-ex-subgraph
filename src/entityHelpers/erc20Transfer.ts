@@ -33,7 +33,7 @@ export function createErc20TransfersFromReceipt(event: ethereum.Event): Erc20Tra
     for (let i = 0; i < receipt.logs.length; i++) {
         const log = receipt.logs[i];
 
-        if (log.topics.length >= 2) {
+        if (log.topics.length > 2) {
             const eventSignature = log.topics[0];
             if (TRANSFER_EVENT_SIGNATURE == eventSignature) {
                 const from = ethereum.decode("address", log.topics[1]);
