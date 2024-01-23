@@ -1,7 +1,8 @@
 import { Bytes, ethereum } from "@graphprotocol/graph-ts";
-import { Erc20Transfer, Transaction } from "../../generated/schema";
+import { Erc20Transfer, ProtocolData, Transaction } from "../../generated/schema";
 import { createErc20TransfersFromReceipt } from "./erc20Transfer";
 import { getOrCreateProtocol } from "./protocol";
+import { ONE_BI } from "../common/constants";
 
 export function getOrCreateTransaction(event: ethereum.Event): Transaction {
     const id = event.transaction.hash;
@@ -33,6 +34,12 @@ export function getOrCreateTransaction(event: ethereum.Event): Transaction {
         transaction.erc20TransferCount = transaction.erc20Transfers.length;
 
         transaction.save();
+
+        // Update protocol txn count
+        const protocol = getOrCreateProtocol(event);
+        const data = ProtocolData.load(protocol.id)!; // Guaranteed to exist
+        data.transactionCount = data.transactionCount.plus(ONE_BI);
+        data.save();
     }
 
     return transaction;

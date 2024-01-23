@@ -43,6 +43,7 @@ export function createErc20Fill(
     const id = event.transaction.hash.concat(Bytes.fromByteArray(Bytes.fromBigInt(event.logIndex)));
     const fill = new Erc20Fill(id);
     const transaction = getOrCreateTransaction(event);
+    const inputToken = getOrCreateErc20Token(inputTokenAddress, event);
 
     fill._protocol = getOrCreateProtocol(event).id;
 
@@ -58,7 +59,7 @@ export function createErc20Fill(
     fill.filler = getOrCreateAccount(fillerAddress, event).id;
     fill.destination = getOrCreateAccount(destinationAddress, event).id;
 
-    fill.inputToken = getOrCreateErc20Token(inputTokenAddress, event).id;
+    fill.inputToken = inputToken.id;
     fill.outputToken = getOrCreateErc20Token(outputTokenAddress, event).id;
 
     fill.inputTokenAmount = inputTokenAmount;
@@ -71,8 +72,6 @@ export function createErc20Fill(
     fill.extraData = extraData;
 
     fill.tokenPair = getOrCreateErc20TokenPair(inputTokenAddress, outputTokenAddress, event).id;
-
-    fill.save();
 
     // Increment transaction erc20 fill count
     transaction.erc20FillCount += 1;
@@ -133,10 +132,17 @@ export function createErc20Fill(
     );
 
     // Update fill summary data
-    updateErc20FillTypeSummaryData(type, derivedInputTokenAmountUsd, event);
+    updateErc20FillTypeSummaryData(type, derivedInputTokenAmountUsd, inputToken.whitelisted, event);
 
     // Update protocol data
-    updateProtocolDataForErc20Fill(derivedInputTokenAmountUsd, event);
+    if (outputTokenAmount.notEqual(ZERO_BI)) {
+        // Ignore if output is zero (its not a real fill...)
+        updateProtocolDataForErc20Fill(derivedInputTokenAmountUsd, inputToken.whitelisted, event);
+    }
+
+    fill.derivedInputTokenAmountUsd = derivedInputTokenAmountUsd;
+    fill.derivedOutputTokenAmountUsd = derivedOutputTokenAmountUsd;
+    fill.save();
 
     return fill;
 }
@@ -153,7 +159,9 @@ export function getOrCreateErc20FillTypeSummary(type: string, event: ethereum.Ev
         summary.type = type;
 
         const data = new Erc20FillTypeSummaryData(id);
+        data.erc20FillTypeSummary = summary.id;
         data.fillVolumeUsd = ZERO_BD;
+        data.whitelistFillVolumeUsd = ZERO_BD;
         data.fillCount = ZERO_BI;
         data.uniqueUsers = ZERO_BI;
         data.save();
@@ -166,12 +174,21 @@ export function getOrCreateErc20FillTypeSummary(type: string, event: ethereum.Ev
     return summary;
 }
 
-function updateErc20FillTypeSummaryData(type: string, volumeUsd: BigDecimal, event: ethereum.Event): void {
+function updateErc20FillTypeSummaryData(
+    type: string,
+    volumeUsd: BigDecimal,
+    isWhitelistedToken: boolean,
+    event: ethereum.Event
+): void {
     const summary = getOrCreateErc20FillTypeSummary(type, event);
     const data = Erc20FillTypeSummaryData.load(summary.id)!; // Guaranteed to exist
 
     data.fillVolumeUsd = data.fillVolumeUsd.plus(volumeUsd);
     data.fillCount = data.fillCount.plus(ONE_BI);
+
+    if (isWhitelistedToken) {
+        data.whitelistFillVolumeUsd = data.whitelistFillVolumeUsd.plus(volumeUsd);
+    }
 
     if (isUniqueUser(event.transaction.from, UniqueUserUsageId.Erc20FillSummary)) {
         data.uniqueUsers = data.uniqueUsers.plus(ONE_BI);

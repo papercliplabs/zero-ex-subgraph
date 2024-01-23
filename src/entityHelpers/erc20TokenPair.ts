@@ -45,6 +45,7 @@ export function getOrCreateErc20TokenPair(
         pair.tokenB = getOrCreateErc20Token(tokenBAddress, event).id;
 
         const data = new Erc20TokenPairData(id);
+        data.pair = pair.id;
 
         data.volumeAtoB = ZERO_BI;
         data.volumeBtoA = ZERO_BI;

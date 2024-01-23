@@ -1,7 +1,17 @@
-import { ethereum, Address, BigDecimal, log } from "@graphprotocol/graph-ts";
-import { Account, AccountData } from "../../generated/schema";
-import { Erc20FillRole, ONE_BI, ZERO_BD, ZERO_BI } from "../common/constants";
+import { ethereum, Address, BigDecimal, log, Bytes } from "@graphprotocol/graph-ts";
+import { Account, AccountData, DailyAccountData, WeeklyAccountData } from "../../generated/schema";
+import {
+    EXCLUDE_HISTORICAL_DATA,
+    Erc20FillRole,
+    ONE_BI,
+    SECONDS_PER_DAY,
+    SECONDS_PER_HOUR,
+    SECONDS_PER_WEEK,
+    ZERO_BD,
+    ZERO_BI,
+} from "../common/constants";
 import { getOrCreateProtocol } from "./protocol";
+import { copyEntity } from "../common/utils";
 
 export function getOrCreateAccount(address: Address, event: ethereum.Event): Account {
     let account = Account.load(address);
@@ -13,6 +23,7 @@ export function getOrCreateAccount(address: Address, event: ethereum.Event): Acc
         account.address = address;
 
         const data = new AccountData(account.id);
+        data.account = account.id;
         data.erc20FillSourceVolumeUsd = ZERO_BD;
         data.erc20FillFillerVolumeUsd = ZERO_BD;
         data.erc20FillDestinationVolumeUsd = ZERO_BD;
@@ -28,6 +39,8 @@ export function getOrCreateAccount(address: Address, event: ethereum.Event): Acc
         data.save();
 
         account.data = data.id;
+        account.lastUpdatedBlock = ZERO_BI;
+
         account.save();
     }
 
@@ -56,7 +69,13 @@ export function updateAccountDataForErc20Fill(
         log.error("updateAccountDataForErc20Fill: role not supported - {}", [role]);
     }
 
+    // Create snapshots
+    createAccountSnapshotsIfNecessary(account, data, event);
+
     data.save();
+
+    account.lastUpdatedBlock = event.block.number;
+    account.save();
 }
 
 export function updateAccountDataForNftFill(
@@ -77,5 +96,52 @@ export function updateAccountDataForNftFill(
         data.nftFillTakerCount = data.nftFillTakerCount.plus(ONE_BI);
     }
 
+    // Create snapshots
+    createAccountSnapshotsIfNecessary(account, data, event);
+
     data.save();
+
+    account.lastUpdatedBlock = event.block.number;
+    account.save();
+}
+
+function createAccountSnapshotsIfNecessary(account: Account, data: AccountData, event: ethereum.Event): void {
+    if (EXCLUDE_HISTORICAL_DATA) {
+        return;
+    }
+
+    const hour = event.block.timestamp.div(SECONDS_PER_HOUR);
+    const day = event.block.timestamp.div(SECONDS_PER_DAY);
+    const week = event.block.timestamp.div(SECONDS_PER_WEEK);
+
+    const hourlyId = account.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(hour)));
+    const dailyId = account.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(day)));
+    const weeklyId = account.id.concat(Bytes.fromByteArray(Bytes.fromBigInt(week)));
+
+    let dailyData = DailyAccountData.load(dailyId);
+    let weeklyData = WeeklyAccountData.load(weeklyId);
+
+    if (!dailyData || !weeklyData) {
+        const dataId = hourlyId;
+        const dataSnapshot = copyEntity(data, new AccountData(dataId));
+        dataSnapshot.save();
+
+        if (!dailyData) {
+            dailyData = new DailyAccountData(dailyId);
+            dailyData.day = day;
+            dailyData.timestamp = event.block.timestamp;
+            dailyData.account = account.id;
+            dailyData.data = dataSnapshot.id;
+            dailyData.save();
+        }
+
+        if (!weeklyData) {
+            weeklyData = new WeeklyAccountData(weeklyId);
+            weeklyData.week = week;
+            weeklyData.timestamp = event.block.timestamp;
+            weeklyData.account = account.id;
+            weeklyData.data = dataSnapshot.id;
+            weeklyData.save();
+        }
+    }
 }

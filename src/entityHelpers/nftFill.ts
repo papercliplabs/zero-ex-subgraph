@@ -22,6 +22,7 @@ export function createNftFill(
     const id = event.transaction.hash.concat(Bytes.fromByteArray(Bytes.fromBigInt(event.logIndex)));
     const fill = new NftFill(id);
     const transaction = getOrCreateTransaction(event);
+    const erc20Token = getOrCreateErc20Token(erc20TokenAddress, event);
 
     fill._protocol = getOrCreateProtocol(event).id;
 
@@ -40,7 +41,7 @@ export function createNftFill(
     fill.collection = getOrCreateNftCollection(nftAddress, type, event).id;
     fill.nft = getOrCreateNft(nftAddress, type, nftTokenId, event).id;
 
-    fill.erc20Token = getOrCreateErc20Token(erc20TokenAddress, event).id;
+    fill.erc20Token = erc20Token.id;
     fill.erc20TokenAmount = erc20TokenAmount;
 
     fill.save();
@@ -57,10 +58,10 @@ export function createNftFill(
     );
 
     // Update protocol data
-    updateProtocolDataForNftFill(erc20TokenAmountUsd, event);
+    updateProtocolDataForNftFill(erc20TokenAmountUsd, erc20Token.whitelisted, event);
 
     // Update nft collection data
-    updateNftCollectionDataForNftFill(nftAddress, type, erc20TokenAmountUsd, event);
+    updateNftCollectionDataForNftFill(nftAddress, type, erc20TokenAmountUsd, erc20Token.whitelisted, event);
 
     // Update account
     updateAccountDataForNftFill(

@@ -70,7 +70,9 @@
 - This [Notebook](validation/query.ipynb) contains plots for historical data, this can be useful to help query and visualize the data from the subgraph
 - Historical snapshots are provided on daily and weekly intervals. Ideally these are also provided hourly, but the indexing time increase is too significant. If these are required, it is possible to add them in the future once the subgraph is stabilized (i.e we won't need to re-index for awhile).
 - Unique users: the subgraph considers unique users as unique originating addresses of transactions to the 0x protocol. I.e for any fill, there will only be 1 "user", which is the sender of the transaction. The reason we do this is because we don't assemble entire trades, we only consider fills. Many fills source and destination are the zeroEx proxy, or the flash wallet, and the fillers are pools, so considering fill actors (source, filler, destination) would under count unique users in general.
-
+- Aggregated volumes are provided as `volumeUsd` and `whitelistVolumeUsd`:
+  - volumeUsd: input volume of all erc20s, this is likely incorrect since it includes 'shit coins' which might be price manipulated and cause a skew in overall volume. This can be used to reconstruct an accurate total volume by excluding certain tokens which are causing the errors.
+  - whitelistVolumeUsd: input volume of only whitelisted erc20s, this will be an underestimate on total volume, but more accurate than volumeUsd in general.
 
 
 ## Block Diagrams
@@ -340,5 +342,5 @@ graft:
 
 ## Validation
 
-- [Spreadsheet](https://docs.google.com/spreadsheets/d/1jWB7KghHDBUJVF08xxGYZ2URpdg9PqY1dRGmZZ--s6o/edit#gid=358122596): summarizes all validation
+- [Spreadsheet](https://docs.google.com/spreadsheets/d/1jWB7KghHDBUJVF08xxGYZ2URpdg9PqY1dRGmZZ--s6o/edit?usp=sharing): summarizes all validation
 - [Notebook](validation/query.ipynb): contains queries and plots of all historical data, this is used to source data for the validation spreadsheet

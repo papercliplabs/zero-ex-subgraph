@@ -21,18 +21,23 @@ export function getOrCreateProtocol(event: ethereum.Event): Protocol {
         protocol = new Protocol(PROTOCOL_ID);
 
         const data = new ProtocolData(protocol.id);
-
+        data.protocol = protocol.id;
         data.erc20FillVolumeUsd = ZERO_BD;
+        data.whitelistErc20FillVolumeUsd = ZERO_BD;
         data.erc20FillCount = ZERO_BI;
 
         data.nftFillErc20VolumeUsd = ZERO_BD;
+        data.nftFillWhitelistErc20VolumeUsd = ZERO_BD;
         data.nftFillCount = ZERO_BI;
 
         data.uniqueUserCount = ZERO_BI;
 
+        data.transactionCount = ZERO_BI;
+
         data.save();
 
         protocol.data = data.id;
+        protocol.lastUpdatedBlock = ZERO_BI;
 
         protocol.save();
     }
@@ -40,35 +45,56 @@ export function getOrCreateProtocol(event: ethereum.Event): Protocol {
     return protocol;
 }
 
-export function updateProtocolDataForErc20Fill(fillAmountUsd: BigDecimal, event: ethereum.Event): void {
+export function updateProtocolDataForErc20Fill(
+    fillAmountUsd: BigDecimal,
+    isWhitelistedToken: boolean,
+    event: ethereum.Event
+): void {
     const protocol = getOrCreateProtocol(event);
     const data = ProtocolData.load(protocol.id)!; // Guaranteed to exist
 
     data.erc20FillVolumeUsd = data.erc20FillVolumeUsd.plus(fillAmountUsd);
+
+    if (isWhitelistedToken) {
+        data.whitelistErc20FillVolumeUsd = data.whitelistErc20FillVolumeUsd.plus(fillAmountUsd);
+    }
 
     data.erc20FillCount = data.erc20FillCount.plus(ONE_BI);
 
     if (isUniqueUser(event.transaction.from, UniqueUserUsageId.Protocol)) {
         data.uniqueUserCount = data.uniqueUserCount.plus(ONE_BI);
     }
-
     data.save();
+
+    protocol.lastUpdatedBlock = event.block.number;
+    protocol.save();
 
     createProtocolDataSnapshotsIfNecessary(data, event);
 }
 
-export function updateProtocolDataForNftFill(fillAmountUsd: BigDecimal, event: ethereum.Event): void {
+export function updateProtocolDataForNftFill(
+    fillAmountUsd: BigDecimal,
+    isWhitelistedToken: boolean,
+    event: ethereum.Event
+): void {
     const protocol = getOrCreateProtocol(event);
     const data = ProtocolData.load(protocol.id)!; // Guaranteed to exist
 
     data.nftFillErc20VolumeUsd = data.nftFillErc20VolumeUsd.plus(fillAmountUsd);
     data.nftFillCount = data.nftFillCount.plus(ONE_BI);
 
+    if (isWhitelistedToken) {
+        data.nftFillWhitelistErc20VolumeUsd = data.nftFillWhitelistErc20VolumeUsd.plus(fillAmountUsd);
+    }
+
     if (isUniqueUser(event.transaction.from, UniqueUserUsageId.Protocol)) {
         data.uniqueUserCount = data.uniqueUserCount.plus(ONE_BI);
     }
 
     data.save();
+
+    protocol.lastUpdatedBlock = event.block.number;
+    protocol.save();
 
     createProtocolDataSnapshotsIfNecessary(data, event);
 }

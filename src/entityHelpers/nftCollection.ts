@@ -50,12 +50,15 @@ export function getOrCreateNftCollection(
         }
 
         const data = new NftCollectionData(collectionAddress);
+        data.collection = collection.id;
         data.fillCount = ZERO_BI;
         data.erc20VolumeUsd = ZERO_BD;
+        data.whitelistErc20VolumeUsd = ZERO_BD;
         data.averageFillPriceUsd = ZERO_BD;
         data.save();
 
         collection.data = data.id;
+        collection.lastUpdatedBlock = ZERO_BI;
 
         collection.save();
     }
@@ -67,6 +70,7 @@ export function updateNftCollectionDataForNftFill(
     collectionAddress: Address,
     type: string,
     erc20FillAmountUsd: BigDecimal,
+    isWhitelistedToken: boolean,
     event: ethereum.Event
 ): void {
     const collection = getOrCreateNftCollection(collectionAddress, type, event);
@@ -76,10 +80,17 @@ export function updateNftCollectionDataForNftFill(
     data.erc20VolumeUsd = data.erc20VolumeUsd.plus(erc20FillAmountUsd);
     data.averageFillPriceUsd = data.erc20VolumeUsd.div(data.fillCount.toBigDecimal()); // Denom can't be 0 (incremented above)
 
+    if (isWhitelistedToken) {
+        data.whitelistErc20VolumeUsd = data.whitelistErc20VolumeUsd.plus(erc20FillAmountUsd);
+    }
+
     data.save();
 
     // Create snapshots
     createNftCollectionDataSnapshotsIfNecessary(collection, data, event);
+
+    collection.lastUpdatedBlock = event.block.number;
+    collection.save();
 }
 
 function createNftCollectionDataSnapshotsIfNecessary(

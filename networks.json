@@ -17,8 +17,8 @@
             "startBlock": 10794229
         },
         "PancakeSwapFactory": {
-            "address": "0x1097053Fd2ea711dad45caCcc45EfF7548fCB362",
-            "startBlock": 15614590
+            "address": "0x0000000000000000000000000000000000000000",
+            "startBlock": 10247094
         },
         "UniswapV3Factory": {
             "address": "0x1F98431c8aD98523631AE4a59f267346ea31F984",

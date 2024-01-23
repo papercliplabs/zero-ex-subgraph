@@ -2,6 +2,7 @@ import { Address, BigDecimal, BigInt, Bytes, Entity, ethereum } from "@graphprot
 import { getErc20TransfersForTransaction, getOrCreateTransaction } from "../entityHelpers/transaction";
 import { Erc20Transfer, _ActiveUser } from "../../generated/schema";
 import { ZERO_BD } from "./constants";
+import { getTokenAddressWhitelist } from "./networkSpecific";
 
 export function findMatchingErc20Transfer(
     tokenAddress: Address,
@@ -116,4 +117,16 @@ export function copyEntity<T extends Entity>(from: T, to: T): T {
     }
 
     return to;
+}
+
+export function isAddressInWhitelist(address: Address): boolean {
+    const whitelist = getTokenAddressWhitelist();
+
+    for (let i = 0; i < whitelist.length; i++) {
+        if (whitelist[i].equals(address)) {
+            return true;
+        }
+    }
+
+    return false;
 }

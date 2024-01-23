@@ -26,7 +26,7 @@ import {
     getWrappedNativeAddress,
 } from "../common/networkSpecific";
 import { getOrCreateErc20TokenPair } from "./erc20TokenPair";
-import { bigIntMin, copyEntity, formatUnits } from "../common/utils";
+import { bigIntMin, copyEntity, formatUnits, isAddressInWhitelist } from "../common/utils";
 import { getOrCreateProtocol } from "./protocol";
 
 export function getOrCreateErc20Token(address: Address, event: ethereum.Event): Erc20Token {
@@ -59,6 +59,8 @@ export function getOrCreateErc20Token(address: Address, event: ethereum.Event): 
                 log.error("Create ERC20 - try decimals reverted: {}", [address.toHexString()]);
             }
         }
+
+        token.whitelisted = isAddressInWhitelist(address);
 
         const data = new Erc20TokenData(address);
         data.token = token.id;

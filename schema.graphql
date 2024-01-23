@@ -8,12 +8,14 @@ type Protocol @entity(immutable: true) {
 
     "Current data about the protocol"
     data: ProtocolData!
+    "Last block the current data was updated"
+    lastUpdatedBlock: BigInt!
 
     # Derived
-    "Accounts within the protocol, these are those which have been part of fills"
+    "Accounts within the protocol, these are accounts which are part of fills (source, filler, destination, maker, or taker)"
     accounts: [Account!]! @derivedFrom(field: "_protocol")
 
-    "ERC20 tokens 0x has interacted with, or have been transferred in transactions with the x0 protocol"
+    "ERC20 tokens 0x has interacted with"
     erc20Tokens: [Erc20Token!]! @derivedFrom(field: "_protocol")
     "ERC20 token pairs which erc20 fills have occurred between"
     erc20TokenPairs: [Erc20TokenPair!]! @derivedFrom(field: "_protocol")
@@ -42,21 +44,28 @@ type ProtocolData @entity {
     "protocol ID + time qualifier"
     id: Bytes!
 
-    "USD input volume of all ERC20 fills"
+    "Protocol the data is for"
+    protocol: Protocol!
+
+    "USD input volume of all ERC20 fills, this might be incorrect due to price manipulation of 'shit coins' but you could exclude certain token totals to get an accurate result"
     erc20FillVolumeUsd: BigDecimal!
+    "USD input volume of only ERC20 whitelisted tokens"
+    whitelistErc20FillVolumeUsd: BigDecimal!
     "Number of ERC20 fills"
     erc20FillCount: BigInt!
 
-    "USD volume of all ERC20's which were part of NFT fills"
+    "USD volume of all ERC20's which were part of NFT fills, this might be incorrect due to price manipulation of 'shit coins' but you could exclude certain token totals to get an accurate result"
     nftFillErc20VolumeUsd: BigDecimal!
+    "USD input volume of only ERC20 whitelisted tokens which were part of NFT fills"
+    nftFillWhitelistErc20VolumeUsd: BigDecimal!
     "Number of NFT fills"
     nftFillCount: BigInt!
 
     "Number of unique users"
     uniqueUserCount: BigInt!
 
-    # TODO
-    # transactionCount: BigInt!
+    "Number of transactions which call the 0x protocol"
+    transactionCount: BigInt!
 }
 
 ####
@@ -74,6 +83,8 @@ type Account @entity(immutable: true) {
 
     "Account data"
     data: AccountData!
+    "Last block the current data was updated"
+    lastUpdatedBlock: BigInt!
 
     # Derived
     "All ERC20 fills which this account was the source of"
@@ -87,14 +98,19 @@ type Account @entity(immutable: true) {
     nftMakerFills: [NftFill!]! @derivedFrom(field: "maker")
     "All NFT fills which this account was the taker of"
     nftTakerFills: [NftFill!]! @derivedFrom(field: "taker")
+
+    "Daily historical account data snapshots"
+    dailyDataSnapshots: [DailyAccountData!]! @derivedFrom(field: "account")
+    "Weekly historical account data snapshots"
+    weeklyDataSnapshots: [WeeklyAccountData!]! @derivedFrom(field: "account")
 }
 
 type AccountData @entity {
     "account ID + time qualifier"
     id: Bytes!
 
-    # TODO
-    # account: Account!
+    "Account this data is for"
+    account: Account!
 
     "Volume in USD of erc20 fills where this account was the source"
     erc20FillSourceVolumeUsd: BigDecimal!
@@ -141,6 +157,9 @@ type Erc20Token @entity {
     symbol: String!
     "Token decimals"
     decimals: Int!
+
+    "If this token is part of the token whitelist"
+    whitelisted: Boolean!
 
     "Current data"
     data: Erc20TokenData!
@@ -233,6 +252,9 @@ type Erc20TokenPairData @entity {
     "pairId + time qualifier"
     id: Bytes!
 
+    "Pair the data is for"
+    pair: Erc20TokenData!
+
     "Volume of tokenA traded to tokenB"
     volumeAtoB: BigInt!
     "Volume of tokenB traded to tokenA"
@@ -299,9 +321,10 @@ type Erc20Fill @entity(immutable: true) {
     "Amount of output tokens in the fill"
     outputTokenAmount: BigInt!
 
-    # TODO
-    # inputTokenAmountUsd: BigDecimal!
-    # outputTokenAmountUsd: BigDecimal!
+    "Derived input token amount in USD"
+    derivedInputTokenAmountUsd: BigDecimal!
+    "Derived output token amount in USD"
+    derivedOutputTokenAmountUsd: BigDecimal!
 
     # Optional fee payed with the fill
     feeRecipient: Account!
@@ -342,8 +365,13 @@ type Erc20FillTypeSummary @entity(immutable: true) {
 type Erc20FillTypeSummaryData @entity {
     id: Bytes!
 
-    "Fill volume in USD for fills of this fill type"
+    "Fill type summary the data is for"
+    erc20FillTypeSummary: Erc20FillTypeSummary!
+
+    "USD input volume for fills of this fill type"
     fillVolumeUsd: BigDecimal!
+    "USD input volume of only whitelisted tokens for fills of this fill type"
+    whitelistFillVolumeUsd: BigDecimal!
     "Number of fills of this fill type"
     fillCount: BigInt!
     "Number of unique users who use this fill type"
@@ -378,6 +406,8 @@ type NftCollection @entity(immutable: true) {
 
     "Current data about the nft collection"
     data: NftCollectionData!
+    "Last block the current data was updated"
+    lastUpdatedBlock: BigInt!
 
     # Derived
     "All nfts which were part of Nft fills from this collection"
@@ -394,13 +424,15 @@ type NftCollection @entity(immutable: true) {
 type NftCollectionData @entity {
     id: Bytes!
 
-    # TODO
-    # collection: NftCollection!
+    "Collection the data is for"
+    collection: NftCollection!
 
     "Number of fills of nft's in the collection"
     fillCount: BigInt!
     "USD volume of all Erc20's used as part of the fills with nft's in the collection"
     erc20VolumeUsd: BigDecimal!
+    "USD volume of only whitelisted Erc20's used as part of the fills with nft's in the collection"
+    whitelistErc20VolumeUsd: BigDecimal!
     "Average price in USD of Nft fills in this collection"
     averageFillPriceUsd: BigDecimal!
 }
@@ -688,4 +720,32 @@ type WeeklyNftCollectionData @entity(immutable: true) {
     data: NftCollectionData!
 }
 
-# TODO: account historical
+type DailyAccountData @entity(immutable: true) {
+    "Account id + day"
+    id: Bytes!
+
+    "Days since unix epoch that this snapshot is for"
+    day: BigInt!
+    "Timestamp of the snapshot in seconds since unix epoch"
+    timestamp: BigInt!
+
+    "Account the snapshot is for"
+    account: Account!
+    "Snapshot data"
+    data: AccountData!
+}
+
+type WeeklyAccountData @entity(immutable: true) {
+    "Account id + week"
+    id: Bytes!
+
+    "Weeks since unix epoch that this snapshot is for"
+    week: BigInt!
+    "Timestamp of the snapshot in seconds since unix epoch"
+    timestamp: BigInt!
+
+    "Account the snapshot is for"
+    account: Account!
+    "Snapshot data"
+    data: AccountData!
+}
