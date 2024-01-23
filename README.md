@@ -68,6 +68,8 @@
 - Erc20Fill.feeRecipient is only used for Limit orders, we cannot accurately track fee recipients for erc20Transforms due to no events being emitted. 
 - For erc20BridgeFills, the source and destination will always be the flash wallet. This is because the flash wallet is always the address that interacts with the bridge. From the perspective of the individual fill, this is accurate since the input tokens flow from the flash wallet to the filler, and the output tokens flow from filler to flash wallet. This information is what is required to assemble the entire swap for complex swaps (multihop, batch, and/or multiple transforms), see the note above about why we do not attempt to do this assembly at indexing time. 
 - This [Notebook](validation/query.ipynb) contains plots for historical data, this can be useful to help query and visualize the data from the subgraph
+- Historical snapshots are provided on daily and weekly intervals. Ideally these are also provided hourly, but the indexing time increase is too significant. If these are required, it is possible to add them in the future once the subgraph is stabilized (i.e we won't need to re-index for awhile).
+- Unique users: the subgraph considers unique users as unique originating addresses of transactions to the 0x protocol. I.e for any fill, there will only be 1 "user", which is the sender of the transaction. The reason we do this is because we don't assemble entire trades, we only consider fills. Many fills source and destination are the zeroEx proxy, or the flash wallet, and the fillers are pools, so considering fill actors (source, filler, destination) would under count unique users in general.
 
 
 
@@ -339,4 +341,4 @@ graft:
 ## Validation
 
 - [Spreadsheet](https://docs.google.com/spreadsheets/d/1jWB7KghHDBUJVF08xxGYZ2URpdg9PqY1dRGmZZ--s6o/edit#gid=358122596): summarizes all validation
-- [Notebook](validation/query.ipynb): contains queries and plots of all historical data
+- [Notebook](validation/query.ipynb): contains queries and plots of all historical data, this is used to source data for the validation spreadsheet

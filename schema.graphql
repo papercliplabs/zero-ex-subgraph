@@ -54,6 +54,9 @@ type ProtocolData @entity {
 
     "Number of unique users"
     uniqueUserCount: BigInt!
+
+    # TODO
+    # transactionCount: BigInt!
 }
 
 ####
@@ -89,6 +92,9 @@ type Account @entity(immutable: true) {
 type AccountData @entity {
     "account ID + time qualifier"
     id: Bytes!
+
+    # TODO
+    # account: Account!
 
     "Volume in USD of erc20 fills where this account was the source"
     erc20FillSourceVolumeUsd: BigDecimal!
@@ -388,6 +394,9 @@ type NftCollection @entity(immutable: true) {
 type NftCollectionData @entity {
     id: Bytes!
 
+    # TODO
+    # collection: NftCollection!
+
     "Number of fills of nft's in the collection"
     fillCount: BigInt!
     "USD volume of all Erc20's used as part of the fills with nft's in the collection"
@@ -678,3 +687,5 @@ type WeeklyNftCollectionData @entity(immutable: true) {
     "Snapshot data"
     data: NftCollectionData!
 }
+
+# TODO: account historical
