@@ -97,6 +97,12 @@ const tokenAddressWhitelist = new Map<string, Address[]>()
         Address.fromString("0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1"), // DAI
         Address.fromString("0x94b008aA00579c1307B0EF2c499aD98a8ce58e58"), // USDT
         Address.fromString("0x68f180fcCe6836688e9084f035309E29Bf0A2095"), // WBTC
+        Address.fromString("0x4200000000000000000000000000000000000042"), // OP
+        Address.fromString("0x1F32b1c2345538c0c6f582fCB022739c4A194Ebb"), // wstETH
+        Address.fromString("0x8c6f28f2F1A3C87F0f938b96d27520d9751ec8d9"), // sUSD
+        Address.fromString("0x9Bcef72be871e61ED4fBbc7630889beE758eb81D"), // rETH
+        Address.fromString("0xadDb6A0412DE1BA0F936DCaeb8Aaa24578dcF3B2"), // cbETH
+        Address.fromString("0x350a791Bfc2C21F9Ed5d10980Dad2e2638ffa7f6"), // LINK
     ])
     .set(SupportedChain.ARBITRUM, [
         NATIVE_ADDRESS,
@@ -106,14 +112,19 @@ const tokenAddressWhitelist = new Map<string, Address[]>()
         Address.fromString("0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1"), // DAI
         Address.fromString("0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9"), // USDT
         Address.fromString("0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f"), // WBTC
+        Address.fromString("0x912CE59144191C1204E64559FE8253a0e49E6548"), // ARB
+        Address.fromString("0x5979D7b546E38E414F7E9822514be443A4800529"), // wstETH
+        Address.fromString("0xf97f4df75117a78c1A5a0DBb814Af92458539FB4"), // LINK
     ])
     .set(SupportedChain.BASE, [
         NATIVE_ADDRESS,
         Address.fromString("0x4200000000000000000000000000000000000006"), // WETH
         Address.fromString("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"), // USDC
         Address.fromString("0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb"), // DAI
-        // Address.fromString(""), // USDT
-        // Address.fromString(""), // WBTC
+        Address.fromString("0xd9aAEc86B65D86f6A7B5B1b0c42FFA531710b6CA"), // USDbC
+        Address.fromString("0x2Ae3F1Ec7F1F5012CFEab0185bfc7aa3cf0DEc22"), // cbETH
+        Address.fromString("0xB6fe221Fe9EeF5aBa221c348bA20A1Bf5e73624c"), // rETH
+        Address.fromString("0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452"), // wstETH
     ])
     .set(SupportedChain.POLYGON, [
         NATIVE_ADDRESS,
@@ -123,14 +134,18 @@ const tokenAddressWhitelist = new Map<string, Address[]>()
         Address.fromString("0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063"), // DAI
         Address.fromString("0xc2132D05D31c914a87C6611C10748AEb04B58e8F"), // USDT
         Address.fromString("0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6"), // WBTC
+        Address.fromString("0xEA1132120ddcDDA2F119e99Fa7A27a0d036F7Ac9"), // stMATIC
+        Address.fromString("0x53E0bca35eC356BD5ddDFebbD1Fc0fD03FaBad39"), // LINK
     ])
     .set(SupportedChain.BNB, [
         NATIVE_ADDRESS,
         Address.fromString("0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"), // WBNB
-        // Address.fromString(""), // USDC
-        // Address.fromString(""), // DAI
-        // Address.fromString(""), // USDT
-        // Address.fromString(""), // WBTC
+        Address.fromString("0x55d398326f99059fF775485246999027B3197955"), // USDC
+        Address.fromString("0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d"), // USDC
+        Address.fromString("0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56"), // BUSD
+        Address.fromString("0x55d398326f99059fF775485246999027B3197955"), // USDT
+        Address.fromString("0x2170Ed0880ac9A755fd29B2688956BD959F933F8"), // ETH
+        Address.fromString("0x1AF3F329e8BE154074D8769D1FFa4eE058B1DBc3"), // DAI
     ])
     .set(SupportedChain.AVALANCHE, [
         NATIVE_ADDRESS,
@@ -139,25 +154,36 @@ const tokenAddressWhitelist = new Map<string, Address[]>()
         Address.fromString("0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E"), // USDC
         Address.fromString("0xA7D7079b0FEaD91F3e65f86E8915Cb59c1a4C664"), // USDC.e
         Address.fromString("0xd586E7F844cEa2F87f50152665BCbc2C279D8d70"), // DAI.e
-        Address.fromString("0x50b7545627a5162F82A992c33b87aDc75187B218"), // USDT
-        Address.fromString("0x50b7545627a5162F82A992c33b87aDc75187B218"), // WBTC.e
+        Address.fromString("0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7"), // USDT
+        Address.fromString("0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7"), // WBTC.e
+        Address.fromString("0x152b9d0FdC40C096757F570A51E494bd4b943E50"), // BTC.b
+        Address.fromString("0x2b2C81e08f1Af8835a78Bb2A90AE924ACE0eA4bE"), // sAVAX
     ])
     .set(SupportedChain.FANTOM, [
         NATIVE_ADDRESS,
         Address.fromString("0x21be370D5312f44cB42ce377BC9b8a0cEF1A4C83"), // WFTM
         Address.fromString("0x04068DA6C83AFCFA0e13ba15A6696662335D5B75"), // USDC
         Address.fromString("0x8D11eC38a3EB5E956B052f67Da8Bdc9bef8Abf3E"), // DAI
-        // Address.fromString(""), // USDT
-        // Address.fromString(""), // WBTC
+        Address.fromString("0x321162Cd933E2Be498Cd2267a90534A804051b11"), // BTC
+        Address.fromString("0x74E23dF9110Aa9eA0b6ff2fAEE01e740CA1c642e"), // TOR
+        Address.fromString("0x1B6382DBDEa11d97f24495C9A90b7c88469134a4"), // alsxUSD
+        Address.fromString("0x74b23882a30290451A17c44f4F05243b6b58C76d"), // ETH
+        Address.fromString("0xb3654dc3D10Ea7645f8319668E8F54d2574FBdC8"), // LINK
     ])
     .set(SupportedChain.CELO, [
         NATIVE_ADDRESS,
+        Address.fromString("0x471ece3750da237f93b8e339c536989b8978a438"), // CELO
         Address.fromString("0x765DE816845861e75A25fCA122bb6898B8B1282a"), // CUSD
         Address.fromString("0x122013fd7dF1C6F636a5bb8f03108E876548b455"), // WETH
         Address.fromString("0xef4229c8c3250C675F21BCefa42f58EfbfF6002a"), // USDC
         Address.fromString("0xE4fE50cdD716522A56204352f00AA110F731932d"), // DAI
         Address.fromString("0x617f3112bf5397D0467D315cC709EF968D9ba546"), // USDT
         Address.fromString("0xBAAB46E28388d2779e6E31Fd00cF0e5Ad95E327B"), // WBTC
+        Address.fromString("0xd15ec721c2a896512ad29c671997dd68f9593226"), // SUSHI
+        Address.fromString("0xd629eb00deced2a080b7ec630ef6ac117e614f1b"), // BTC
+        Address.fromString("0x2def4285787d58a2f811af24755a8150622f4361"), // cETH
+        Address.fromString("0xc16b81af351ba9e64c1a069e3ab18c244a1e3049"), // agEUR
+        Address.fromString("0xD8763CBa276a3738E6DE85b4b3bF5FDed6D6cA73"), // cEUR
     ])
     .set("fallback", []);
 

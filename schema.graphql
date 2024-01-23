@@ -2,7 +2,7 @@
 # Protocol
 ####
 
-type Protocol @entity(immutable: true) {
+type Protocol @entity {
     "Hardcoded 0, singleton"
     id: Bytes!
 
@@ -72,7 +72,7 @@ type ProtocolData @entity {
 # Account
 ####
 
-type Account @entity(immutable: true) {
+type Account @entity {
     "Address"
     id: Bytes!
 
@@ -387,7 +387,7 @@ enum NftCollectionType {
     Erc1155
 }
 
-type NftCollection @entity(immutable: true) {
+type NftCollection @entity {
     "Address"
     id: Bytes!
 
