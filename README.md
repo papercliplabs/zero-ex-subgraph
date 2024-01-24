@@ -28,17 +28,17 @@
 
 ## Subgraph Deployments
 
-| Blockchain Network | The Graph Hosted                                                                                     | The Graph Decentralized | Alchemy |
-| ------------------ | ---------------------------------------------------------------------------------------------------- | ----------------------- | ------- |
-| Ethereum Mainnet   | [Mainnet Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-mainnet)     | TODO                    | TODO    |
-| Optimism           | [Optimism Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-optimism)   | TODO                    | TODO    |
-| Arbitrum           | [Arbitrum Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-arbitrum)   | TODO                    | TODO    |
-| Base               | [Base Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-base)           | TODO                    | TODO    |
-| Polygon            | [Polygon Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-polygon)     | TODO                    | TODO    |
-| BNB                | [BNB Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-bnb)             | TODO                    | TODO    |
-| Avalanche          | [Avalanche Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-avalanche) | TODO                    | TODO    |
-| Fantom             | [Fantom Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-fantom)       | TODO                    | TODO    |
-| Celo               | [Celo Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-celo)           | TODO                    | TODO    |
+| Blockchain Network | The Graph Hosted                                                                                     | The Graph Decentralized                                                                                                                          |
+| ------------------ | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Ethereum Mainnet   | [Mainnet Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-mainnet)     | [Mainnet Decentralized](https://thegraph.com/explorer/subgraphs/8z2m5ieDP7gXoZM41zhQeBQ5ihh4eaNQTYLxmvS1tfM3?view=Overview&chain=arbitrum-one)   |
+| Optimism           | [Optimism Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-optimism)   | [Optimism Decentralized](https://thegraph.com/explorer/subgraphs/GaGpbxRjid6qX7rtmRqWbCWhipMnqd296ru3TC8CEHXC?view=Overview&chain=arbitrum-one)  |
+| Arbitrum           | [Arbitrum Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-arbitrum)   | [Arbitrum Decentralized](https://thegraph.com/explorer/subgraphs/2vqKhiDjGGC9RckYcJvJjhogvnoFW76J5kugevpGFAfY?view=Overview&chain=arbitrum-one)  |
+| Base               | [Base Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-base)           | [Base Decentralized](https://thegraph.com/explorer/subgraphs/9mjM89YWHUGch4NT7T2CZ9DCCz2u1sj6FnueDDgjejBP?view=Overview&chain=arbitrum-one)      |
+| Polygon            | [Polygon Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-polygon)     | [Polygon Decentralized](https://thegraph.com/explorer/subgraphs/Hz7u4jLLRyVrJHm1meTptPnyDRsYKwMHNZcDHRL7H9wz?view=Overview&chain=arbitrum-one)   |
+| BNB                | [BNB Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-bnb)             | [BNB Decentralized](https://thegraph.com/explorer/subgraphs/EsYH4nwWf4EREcC5eb4hp75h8uVQKN29L73XTkscKwey?view=Overview&chain=arbitrum-one)       |
+| Avalanche          | [Avalanche Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-avalanche) | [Avalanche Decentralized](https://thegraph.com/explorer/subgraphs/7VrMWA69ZgjqLY5UtacTo1rzeCbWzTnqbkSprsi3Kkp6?view=Overview&chain=arbitrum-one) |
+| Fantom             | [Fantom Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-fantom)       | [Fantom Decentralized](https://thegraph.com/explorer/subgraphs/3KGwtWH7fjgv3gQj8AQm8QgBZLB5jJHcihjtbPYLpLdA?view=Overview&chain=arbitrum-one)    |
+| Celo               | [Celo Hosted](https://thegraph.com/hosted-service/subgraph/papercliplabs/0x-protocol-celo)           | [Celo Decentralized](https://thegraph.com/explorer/subgraphs/9JdP8udBnHezjCRdimW8ehCtcmwRxFGBhZVxLYUMW4dt?view=Overview&chain=arbitrum-one)      |
 
 ## Usage Notes
 
