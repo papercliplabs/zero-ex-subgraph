@@ -1,0 +1,22 @@
+{
+    erc20TokenPairs(first: 20, orderBy: lastUpdatedBlock, orderDirection: desc) {
+        tokenA {
+            symbol
+        }
+        tokenB {
+            symbol
+        }
+        data {
+            volumeAtoB
+            volumeBtoA
+            fillCountAtoB
+            fillCountBtoA
+            exchangeRateAtoB
+            exchangeRateBtoA
+        }
+        lastUpdatedBlock
+        fills(first: 5) {
+            id
+        }
+    }
+}

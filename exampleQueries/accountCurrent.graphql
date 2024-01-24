@@ -1,0 +1,32 @@
+{
+    accounts(first: 5) {
+        address
+        data {
+            erc20FillSourceVolumeUsd
+            erc20FillFillerVolumeUsd
+            erc20FillDestinationVolumeUsd
+            erc20FillSourceCount
+            erc20FillFillerCount
+            erc20FillDestinationCount
+            nftFillMakerCount
+            nftFillTakerCount
+            nftFillErc20VolumePaidUsd
+        }
+        lastUpdatedBlock
+        erc20SourceFills(first: 2) {
+            id
+        }
+        erc20FillerFills(first: 2) {
+            id
+        }
+        erc20DestinationFills(first: 2) {
+            id
+        }
+        nftMakerFills(first: 2) {
+            id
+        }
+        nftTakerFills(first: 2) {
+            id
+        }
+    }
+}

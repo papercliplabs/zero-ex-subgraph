@@ -1,0 +1,34 @@
+{
+    erc20TokenPairs(first: 20, orderBy: lastUpdatedBlock, orderDirection: desc) {
+        tokenA {
+            symbol
+        }
+        tokenB {
+            symbol
+        }
+        dailyDataSnapshots {
+            timestamp
+            day
+            data {
+                volumeAtoB
+                volumeBtoA
+                fillCountAtoB
+                fillCountBtoA
+                exchangeRateAtoB
+                exchangeRateBtoA
+            }
+        }
+        weeklyDataSnapshots {
+            timestamp
+            week
+            data {
+                volumeAtoB
+                volumeBtoA
+                fillCountAtoB
+                fillCountBtoA
+                exchangeRateAtoB
+                exchangeRateBtoA
+            }
+        }
+    }
+}

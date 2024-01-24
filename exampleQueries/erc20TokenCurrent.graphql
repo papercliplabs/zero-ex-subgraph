@@ -1,0 +1,39 @@
+{
+    erc20Tokens(first: 2) {
+        address
+        name
+        symbol
+        decimals
+        whitelisted
+        data {
+            erc20FillInputVolume
+            erc20FillOutputVolume
+            erc20FillInputVolumeUsd
+            erc20FillOutputVolumeUsd
+            erc20InputFillCount
+            erc20OutputFillCount
+            nftFillVolume
+            nftFillVolumeUsd
+            nftFillCount
+            derivedPriceInNative
+            derivedPriceInUsd
+        }
+        lastUpdatedBlock
+        lastDerivedPriceBlock
+        erc20InputTokenFills(first: 2) {
+            id
+        }
+        erc20OutputTokenFills(first: 2) {
+            id
+        }
+        pairsA(first: 2) {
+            id
+        }
+        pairsB(first: 2) {
+            id
+        }
+        nftFills(first: 2) {
+            id
+        }
+    }
+}

@@ -1,0 +1,26 @@
+{
+    transactions {
+        hash
+        blockNumber
+        timestamp
+        from
+        to
+        gasLimit
+        gasPrice
+        gasUsed
+        erc20FillCount
+        erc20TransferCount
+        nftFillCount
+        erc20Transfers {
+            fromAddress
+            toAddress
+            amount
+        }
+        erc20Fills {
+            id
+        }
+        nftFills {
+            id
+        }
+    }
+}

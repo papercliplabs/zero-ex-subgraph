@@ -1,0 +1,39 @@
+{
+    erc20Tokens(first: 2) {
+        address
+        dailyDataSnapshots {
+            timestamp
+            day
+            data {
+                erc20FillInputVolume
+                erc20FillOutputVolume
+                erc20FillInputVolumeUsd
+                erc20FillOutputVolumeUsd
+                erc20InputFillCount
+                erc20OutputFillCount
+                nftFillVolume
+                nftFillVolumeUsd
+                nftFillCount
+                derivedPriceInNative
+                derivedPriceInUsd
+            }
+        }
+        weeklyDataSnapshots {
+            timestamp
+            week
+            data {
+                erc20FillInputVolume
+                erc20FillOutputVolume
+                erc20FillInputVolumeUsd
+                erc20FillOutputVolumeUsd
+                erc20InputFillCount
+                erc20OutputFillCount
+                nftFillVolume
+                nftFillVolumeUsd
+                nftFillCount
+                derivedPriceInNative
+                derivedPriceInUsd
+            }
+        }
+    }
+}

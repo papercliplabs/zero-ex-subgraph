@@ -1,0 +1,15 @@
+{
+    erc20FillTypeSummaries {
+        type
+        data {
+            fillVolumeUsd
+            whitelistFillVolumeUsd
+            fillCount
+            uniqueUsers
+        }
+        erc20Fills(first: 5) {
+            id
+            type
+        }
+    }
+}

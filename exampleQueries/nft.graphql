@@ -1,0 +1,12 @@
+{
+    nfts {
+        tokenId
+        collection {
+            address
+        }
+        tokenUri
+        fills {
+            id
+        }
+    }
+}

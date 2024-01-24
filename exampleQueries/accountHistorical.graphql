@@ -1,0 +1,35 @@
+{
+    accounts(first: 2) {
+        address
+        dailyDataSnapshots(first: 10) {
+            timestamp
+            day
+            data {
+                erc20FillSourceVolumeUsd
+                erc20FillFillerVolumeUsd
+                erc20FillDestinationVolumeUsd
+                erc20FillSourceCount
+                erc20FillFillerCount
+                erc20FillDestinationCount
+                nftFillMakerCount
+                nftFillTakerCount
+                nftFillErc20VolumePaidUsd
+            }
+        }
+        weeklyDataSnapshots(first: 10) {
+            timestamp
+            week
+            data {
+                erc20FillSourceVolumeUsd
+                erc20FillFillerVolumeUsd
+                erc20FillDestinationVolumeUsd
+                erc20FillSourceCount
+                erc20FillFillerCount
+                erc20FillDestinationCount
+                nftFillMakerCount
+                nftFillTakerCount
+                nftFillErc20VolumePaidUsd
+            }
+        }
+    }
+}

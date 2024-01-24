@@ -1,0 +1,29 @@
+{
+    nftFills {
+        id
+        blockNumber
+        timestamp
+        transaction {
+            hash
+        }
+        logIndex
+        type
+        direction
+        maker {
+            address
+        }
+        taker {
+            address
+        }
+        collection {
+            address
+        }
+        nft {
+            tokenId
+        }
+        erc20Token {
+            symbol
+        }
+        erc20TokenAmount
+    }
+}

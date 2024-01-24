@@ -1,0 +1,45 @@
+{
+    protocols {
+        id
+        data {
+            id
+            erc20FillVolumeUsd
+            whitelistErc20FillVolumeUsd
+            erc20FillCount
+            nftFillErc20VolumeUsd
+            nftFillWhitelistErc20VolumeUsd
+            nftFillCount
+            uniqueUserCount
+            transactionCount
+        }
+        lastUpdatedBlock
+        accounts(first: 2) {
+            id
+        }
+        erc20Tokens(first: 2) {
+            id
+        }
+        erc20TokenPairs(first: 2) {
+            id
+        }
+        erc20Fills(first: 2) {
+            id
+        }
+        erc20FillTypeSummary {
+            id
+            type
+        }
+        nftCollections(first: 2) {
+            id
+        }
+        nfts(first: 2) {
+            id
+        }
+        nftFills(first: 2) {
+            id
+        }
+        transactions(first: 2) {
+            id
+        }
+    }
+}

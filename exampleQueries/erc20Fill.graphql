@@ -1,0 +1,39 @@
+{
+    erc20Fills(first: 10) {
+        blockNumber
+        timestamp
+        transaction {
+            hash
+        }
+        logIndex
+        type
+        source {
+            address
+        }
+        filler {
+            address
+        }
+        destination {
+            address
+        }
+        inputToken {
+            symbol
+        }
+        outputToken {
+            symbol
+        }
+        inputTokenAmount
+        outputTokenAmount
+        derivedInputTokenAmountUsd
+        derivedOutputTokenAmountUsd
+        feeRecipient {
+            address
+        }
+        feeRecipientAmount
+        protocolFeeAmount
+        extraData
+        tokenPair {
+            id
+        }
+    }
+}

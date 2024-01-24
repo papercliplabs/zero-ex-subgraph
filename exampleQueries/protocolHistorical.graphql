@@ -1,0 +1,35 @@
+{
+    protocols {
+        id
+        dailyDataSnapshots(first: 10) {
+            timestamp
+            day
+            data {
+                id
+                erc20FillVolumeUsd
+                whitelistErc20FillVolumeUsd
+                erc20FillCount
+                nftFillErc20VolumeUsd
+                nftFillWhitelistErc20VolumeUsd
+                nftFillCount
+                uniqueUserCount
+                transactionCount
+            }
+        }
+        weeklyDataSnapshots(first: 10) {
+            timestamp
+            week
+            data {
+                id
+                erc20FillVolumeUsd
+                whitelistErc20FillVolumeUsd
+                erc20FillCount
+                nftFillErc20VolumeUsd
+                nftFillWhitelistErc20VolumeUsd
+                nftFillCount
+                uniqueUserCount
+                transactionCount
+            }
+        }
+    }
+}

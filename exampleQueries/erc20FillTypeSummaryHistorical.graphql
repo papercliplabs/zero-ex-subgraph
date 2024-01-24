@@ -1,0 +1,25 @@
+{
+    erc20FillTypeSummaries {
+        type
+        dailyDataSnapshots {
+            timestamp
+            day
+            data {
+                fillVolumeUsd
+                whitelistFillVolumeUsd
+                fillCount
+                uniqueUsers
+            }
+        }
+        weeklyDataSnapshots {
+            timestamp
+            week
+            data {
+                fillVolumeUsd
+                whitelistFillVolumeUsd
+                fillCount
+                uniqueUsers
+            }
+        }
+    }
+}

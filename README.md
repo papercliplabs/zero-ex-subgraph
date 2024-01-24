@@ -42,8 +42,11 @@
 
 ## Usage Notes
 
--   One limitation of subgraphs is the inability to track native asset transfers (ex. ETH) in internal calls. This means we cannot accurately do accounting of complex swaps which use native assets during or at the end of the swap.
--   We try our best to infer the sender, filler and recipient for each fill when they are not provided by an event, but sometimes it is not possible. This occurs for example, in cases where:
+- Each element in the schema is well documents. You can view the docs directly in the [schema file](./schema.graphql), or The Graph also displays these in their graphql interface.
+- We provided [example queries](./exampleQueries/) to help people get started. These can also be seen in The Graphs playground.
+- As part of validation, we wrote some [Jupyter notebooks](./validation/notebooks) which query the subgraphs in Python. In the [historical notebook](./validation/notebooks/historical.ipynb) we plot a lot of historical data, which can be useful to help visualize the data. 
+- One limitation of subgraphs is the inability to track native asset transfers (ex. ETH) in internal calls. This means we cannot accurately do accounting of complex swaps which use native assets during or at the end of the swap.
+- We try our best to infer the sender, filler and recipient for each fill when they are not provided by an event, but sometimes it is not possible. This occurs for example, in cases where:
     -   An ERC20 doesn't emit Transfer events, or the event doesn't not conform to the ERC20 standard
     -   During LiquidityProviderSwap when the input token is the native asset. 
     -   During BridgeFills when the input token is ETH, and the output token gets minted (for example, ETH -> cETHv3)
@@ -67,7 +70,6 @@
     -  it is possible that the input token doesn't actually go to the filler and instead to a recipient the filler specifies (ex batch RFQ orders), we don't explicitly try to derive this as it would require tracking and deriving another role in general (the input token recipient). See the note above about inferring roles where event data doesn't provide this information.
 - Erc20Fill.feeRecipient is only used for Limit orders, we cannot accurately track fee recipients for erc20Transforms due to no events being emitted. 
 - For erc20BridgeFills, the source and destination will always be the flash wallet. This is because the flash wallet is always the address that interacts with the bridge. From the perspective of the individual fill, this is accurate since the input tokens flow from the flash wallet to the filler, and the output tokens flow from filler to flash wallet. This information is what is required to assemble the entire swap for complex swaps (multihop, batch, and/or multiple transforms), see the note above about why we do not attempt to do this assembly at indexing time. 
-- This [Notebook](validation/query.ipynb) contains plots for historical data, this can be useful to help query and visualize the data from the subgraph
 - Historical snapshots are provided on daily and weekly intervals. Ideally these are also provided hourly, but the indexing time increase is too significant. If these are required, it is possible to add them in the future once the subgraph is stabilized (i.e we won't need to re-index for awhile).
 - Unique users: the subgraph considers unique users as unique originating addresses of transactions to the 0x protocol. I.e for any fill, there will only be 1 "user", which is the sender of the transaction. The reason we do this is because we don't assemble entire trades, we only consider fills. Many fills source and destination are the zeroEx proxy, or the flash wallet, and the fillers are pools, so considering fill actors (source, filler, destination) would under count unique users in general.
 - Aggregated volumes are provided as `volumeUsd` and `whitelistVolumeUsd`:
@@ -343,4 +345,7 @@ graft:
 ## Validation
 
 - [Spreadsheet](https://docs.google.com/spreadsheets/d/1jWB7KghHDBUJVF08xxGYZ2URpdg9PqY1dRGmZZ--s6o/edit?usp=sharing): summarizes all validation
-- [Notebook](validation/query.ipynb): contains queries and plots of all historical data, this is used to source data for the validation spreadsheet
+- Notebooks: these are used to extract data for the validation spreadsheet
+	- [historical](./validation/notebooks/historical.ipynb): extracts and plots subgraph historical data
+	- [current](./validation/notebooks/current.ipynb): extracts subgraph current data (tip)
+	- [external](./validation/notebooks/external.ipynb): extracts data from external API's
