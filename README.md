@@ -12,7 +12,7 @@
 		- [Order Types and Events](#order-types-and-events)
 		- [Contract Contexts](#contract-contexts)
 		- [Contract Source Spawning](#contract-source-spawning)
-		- [Multiplex](#multiplex)
+		- [Multiplex Feature](#multiplex-feature)
 			- [BatchSell](#batchsell)
 			- [MultiHopSell](#multihopsell)
 		- [Token Flows](#token-flows)
@@ -44,7 +44,7 @@
 
 - Each element in the schema is well documents. You can view the docs directly in the [schema file](./schema.graphql), or The Graph also displays these in their graphql interface.
 - We provided [example queries](./exampleQueries/) to help people get started. These can also be seen in The Graphs playground.
-- As part of validation, we wrote some [Jupyter notebooks](./validation/notebooks) which query the subgraphs in Python. In the [historical notebook](./validation/notebooks/historical.ipynb) we plot a lot of historical data, which can be useful to help visualize the data. 
+- As part of validation, we wrote some [Jupyter notebooks](./validation/notebooks) which query the subgraphs in Python. In the [historical notebook](./validation/notebooks/historical.ipynb) we plot a lot of historical data, which can be useful to help visualize some of the subgraph the data. 
 - One limitation of subgraphs is the inability to track native asset transfers (ex. ETH) in internal calls. This means we cannot accurately do accounting of complex swaps which use native assets during or at the end of the swap.
 - We try our best to infer the sender, filler and recipient for each fill when they are not provided by an event, but sometimes it is not possible. This occurs for example, in cases where:
     -   An ERC20 doesn't emit Transfer events, or the event doesn't not conform to the ERC20 standard
@@ -62,22 +62,24 @@
 		source --"input token"--> filler
 		filler --"output token"--> destination
 	```
-- In native orders:
-  	-  maker is the source
-  	-  maker token is the input token
-  	-  taker is the filler 
-  	-  taker token is the output token
-    -  it is possible that the input token doesn't actually go to the filler and instead to a recipient the filler specifies (ex batch RFQ orders), we don't explicitly try to derive this as it would require tracking and deriving another role in general (the input token recipient). See the note above about inferring roles where event data doesn't provide this information.
+	- In native orders:
+		-  maker is the source
+		-  maker token is the input token
+		-  taker is the filler 
+		-  taker token is the output token
+		-  it is possible that the input token doesn't actually go to the filler and instead to a recipient the filler specifies (ex batch RFQ orders), we don't explicitly try to derive this as it would require tracking and deriving another role in general (the input token recipient). See the note above about inferring roles where event data doesn't provide this information.
 - Erc20Fill.feeRecipient is only used for Limit orders, we cannot accurately track fee recipients for erc20Transforms due to no events being emitted. 
 - For erc20BridgeFills, the source and destination will always be the flash wallet. This is because the flash wallet is always the address that interacts with the bridge. From the perspective of the individual fill, this is accurate since the input tokens flow from the flash wallet to the filler, and the output tokens flow from filler to flash wallet. This information is what is required to assemble the entire swap for complex swaps (multihop, batch, and/or multiple transforms), see the note above about why we do not attempt to do this assembly at indexing time. 
-- Historical snapshots are provided on daily and weekly intervals. Ideally these are also provided hourly, but the indexing time increase is too significant. If these are required, it is possible to add them in the future once the subgraph is stabilized (i.e we won't need to re-index for awhile).
+- Historical snapshots are provided on daily and weekly intervals. Ideally these are also provided hourly, but the indexing time increase is too significant. 
 - Unique users: the subgraph considers unique users as unique originating addresses of transactions to the 0x protocol. I.e for any fill, there will only be 1 "user", which is the sender of the transaction. The reason we do this is because we don't assemble entire trades, we only consider fills. Many fills source and destination are the zeroEx proxy, or the flash wallet, and the fillers are pools, so considering fill actors (source, filler, destination) would under count unique users in general.
 - Aggregated volumes are provided as `volumeUsd` and `whitelistVolumeUsd`:
   - volumeUsd: input volume of all erc20s, this is likely incorrect since it includes 'shit coins' which might be price manipulated and cause a skew in overall volume. This can be used to reconstruct an accurate total volume by excluding certain tokens which are causing the errors.
-  - whitelistVolumeUsd: input volume of only whitelisted erc20s, this will be an underestimate on total volume, but more accurate than volumeUsd in general.
+  - whitelistVolumeUsd: input volume of only whitelisted erc20s, this will be an underestimate on total volume, but more accurate than volumeUsd in general. You can see what tokens are whitelisted by looking at `Erc20Token.whitelisted`, or you can view the list [here](./src/common/networkSpecific.ts).
 
 
 ## Block Diagrams
+
+These block diagrams provide an overview of the general functionality of the 0x protocol in the depth required for developing and understanding this subgraph.
 
 ### Order Types and Events
 
@@ -133,7 +135,7 @@ erDiagram
     UniswapV3Factory ||--|{ UniswapV3Pool : "PoolCreated"
 ```
 
-### Multiplex
+### Multiplex Feature
 
 Multiplex allows composition of all order types:
 
@@ -151,7 +153,7 @@ enum MultiplexSubcall {
 }
 ```
 
-#### BatchSell
+#### BatchSell 
 
 ```mermaid
 graph TD
@@ -163,7 +165,7 @@ graph TD
 	SubcallN --> R
 ```
 
-#### MultiHopSell
+#### MultiHopSell 
 
 ```mermaid
 graph TD
@@ -344,7 +346,7 @@ graft:
 
 ## Validation
 
-- [Spreadsheet](https://docs.google.com/spreadsheets/d/1jWB7KghHDBUJVF08xxGYZ2URpdg9PqY1dRGmZZ--s6o/edit?usp=sharing): summarizes all validation
+- [Validation Spreadsheet](https://docs.google.com/spreadsheets/d/1jWB7KghHDBUJVF08xxGYZ2URpdg9PqY1dRGmZZ--s6o/edit?usp=sharing): summarizes all validation
 - Notebooks: these are used to extract data for the validation spreadsheet
 	- [historical](./validation/notebooks/historical.ipynb): extracts and plots subgraph historical data
 	- [current](./validation/notebooks/current.ipynb): extracts subgraph current data (tip)
