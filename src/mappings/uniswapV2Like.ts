@@ -11,31 +11,28 @@ import { UniswapV2PairLike } from "../../generated/templates";
 import { getZeroExProxyAddress } from "../common/networkSpecific";
 
 export function handleUniswapV2PairCreated(event: PairCreatedEvent): void {
-    // Spawn dynamic data source
-    let context = new DataSourceContext();
-    context.setString("fillType", Erc20FillType.OptimizedUniswapV2);
-
     if (!EXCLUDE_OPTIMIZED_SWAPS) {
+        // Spawn dynamic data source
+        let context = new DataSourceContext();
+        context.setString("fillType", Erc20FillType.OptimizedUniswapV2);
         UniswapV2PairLike.createWithContext(event.params.pair, context);
     }
 }
 
 export function handleSushiSwapPairCreated(event: PairCreatedEvent): void {
-    // Spawn dynamic data source
-    let context = new DataSourceContext();
-    context.setString("fillType", Erc20FillType.OptimizedSushiSwap);
-
     if (!EXCLUDE_OPTIMIZED_SWAPS) {
+        // Spawn dynamic data source
+        let context = new DataSourceContext();
+        context.setString("fillType", Erc20FillType.OptimizedSushiSwap);
         UniswapV2PairLike.createWithContext(event.params.pair, context);
     }
 }
 
 export function handlePancakeSwapPairCreated(event: PairCreatedEvent): void {
-    // Spawn dynamic data source
-    let context = new DataSourceContext();
-    context.setString("fillType", Erc20FillType.OptimizedPancakeSwap);
-
     if (!EXCLUDE_OPTIMIZED_SWAPS) {
+        // Spawn dynamic data source
+        let context = new DataSourceContext();
+        context.setString("fillType", Erc20FillType.OptimizedPancakeSwap);
         UniswapV2PairLike.createWithContext(event.params.pair, context);
     }
 }

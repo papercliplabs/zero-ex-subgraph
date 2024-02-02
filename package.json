@@ -44,9 +44,9 @@
         "deploy-studio:celo": "export NAME=celo; yarn deploy-studio:template",
         "auto-deploy:celo": "export NAME=celo; yarn auto-deploy:template",
         "auto-deploy:all": "yarn auto-deploy:mainnet; yarn auto-deploy:optimism; yarn auto-deploy:arbitrum; yarn auto-deploy:base; yarn auto-deploy:polygon; yarn auto-deploy:bnb; yarn auto-deploy:avalanche; yarn auto-deploy:fantom; yarn auto-deploy:celo",
-        "create-local": "source .env; graph create --node http://${LOCAL_NODE_IP}:8020/ papercliplabs/0x-protocol-mainnet-final",
-        "remove-local": "source .env; graph remove --node http://${LOCAL_NODE_IP}:8020/ papercliplabs/0x-protocol-mainnet-final",
-        "deploy-local": "source .env; graph deploy --node http://${LOCAL_NODE_IP}:8020/ --ipfs http://${LOCAL_NODE_IP}:5001 papercliplabs/0x-protocol-mainnet-final --output-dir=build/mainnet --version-label v0",
+        "create-local": "source .env; graph create --node http://${LOCAL_NODE_IP}:8020/ papercliplabs/0x-protocol-mainnet-final-optimized",
+        "remove-local": "source .env; graph remove --node http://${LOCAL_NODE_IP}:8020/ papercliplabs/0x-protocol-mainnet-final-optimized",
+        "deploy-local": "source .env; graph deploy --node http://${LOCAL_NODE_IP}:8020/ --ipfs http://${LOCAL_NODE_IP}:5001 papercliplabs/0x-protocol-mainnet-final-optimized --output-dir=build/mainnet --version-label v0",
         "test": "graph test"
     },
     "dependencies": {
