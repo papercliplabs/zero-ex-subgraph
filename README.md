@@ -42,7 +42,7 @@
 
 ## Usage Notes
 
-- Each element in the schema is well documents. You can view the docs directly in the [schema file](./schema.graphql), or The Graph also displays these in their graphql interface.
+- Each element in the schema is well documented. You can view the docs directly in the [schema file](./schema.graphql), or The Graph also displays these in their graphql interface.
 - We provided [example queries](./exampleQueries/) to help people get started. These can also be seen in The Graphs playground.
 - As part of validation, we wrote some [Jupyter notebooks](./validation/notebooks) which query the subgraphs in Python. In the [historical notebook](./validation/notebooks/historical.ipynb) we plot a lot of historical data, which can be useful to help visualize some of the subgraph the data. 
 - One limitation of subgraphs is the inability to track native asset transfers (ex. ETH) in internal calls. This means we cannot accurately do accounting of complex swaps which use native assets during or at the end of the swap.
@@ -76,7 +76,8 @@
 - Aggregated volumes are provided as `volumeUsd` and `whitelistVolumeUsd`:
   - volumeUsd: input volume of all erc20s, this is likely incorrect since it includes 'shit coins' which might be price manipulated and cause a skew in overall volume. This can be used to reconstruct an accurate total volume by excluding certain tokens which are causing the errors.
   - whitelistVolumeUsd: input volume of only whitelisted erc20s, this will be an underestimate on total volume, but more accurate than volumeUsd in general. You can see what tokens are whitelisted by looking at `Erc20Token.whitelisted`, or you can view the list [here](./src/common/networkSpecific.ts).
-
+- API key: we provide a free community API key to query the graph's decentralized network deployment, reach out to contract@paperclip.xyz to get it.	
+  - Using the api key: replace [api-key] in the query url (get the query url from the deployment) with the api key
 
 ## Block Diagrams
 
