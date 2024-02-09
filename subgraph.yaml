@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: ZeroExProxy
-    network: optimism
+    network: avalanche
     source:
       abi: ZeroExProxy
-      address: "0xdef1abe32c034e558cdd535791643c58a13acc10"
-      startBlock: 1451368
+      address: "0xdef1c0ded9bec7f1a1670819833240f027b25eff"
+      startBlock: 456692
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -50,11 +50,11 @@ dataSources:
       file: ./src/mappings/zeroExProxy.ts
   - kind: ethereum
     name: FlashWallet
-    network: optimism
+    network: avalanche
     source:
       abi: FlashWallet
-      address: "0xa3128d9b7cca7d5af29780a56abeec12b05a6740"
-      startBlock: 1451423
+      address: "0xdb6f1920a889355780af7570773609bd8cb1f498"
+      startBlock: 456692
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -74,11 +74,11 @@ dataSources:
       file: ./src/mappings/flashWallet.ts
   - kind: ethereum
     name: UniswapV2Factory
-    network: optimism
+    network: avalanche
     source:
       abi: UniswapV2FactoryLike
       address: "0x0000000000000000000000000000000000000000"
-      startBlock: 1451368
+      startBlock: 456692
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -98,11 +98,11 @@ dataSources:
       file: ./src/mappings/uniswapV2Like.ts
   - kind: ethereum
     name: SushiSwapFactory
-    network: optimism
+    network: avalanche
     source:
       abi: UniswapV2FactoryLike
       address: "0x0000000000000000000000000000000000000000"
-      startBlock: 1451368
+      startBlock: 456692
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -122,11 +122,11 @@ dataSources:
       file: ./src/mappings/uniswapV2Like.ts
   - kind: ethereum
     name: PancakeSwapFactory
-    network: optimism
+    network: avalanche
     source:
       abi: UniswapV2FactoryLike
       address: "0x0000000000000000000000000000000000000000"
-      startBlock: 1451368
+      startBlock: 456692
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -146,11 +146,11 @@ dataSources:
       file: ./src/mappings/uniswapV2Like.ts
   - kind: ethereum
     name: UniswapV3Factory
-    network: optimism
+    network: avalanche
     source:
       abi: UniswapV3Factory
       address: "0x0000000000000000000000000000000000000000"
-      startBlock: 1451368
+      startBlock: 456692
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -171,7 +171,7 @@ dataSources:
 templates:
   - kind: ethereum
     name: UniswapV2PairLike
-    network: optimism
+    network: avalanche
     source:
       abi: UniswapV2PairLike
     mapping:
@@ -193,7 +193,7 @@ templates:
       file: ./src/mappings/uniswapV2Like.ts
   - kind: ethereum
     name: UniswapV3Pool
-    network: optimism
+    network: avalanche
     source:
       abi: UniswapV3Pool
     mapping:
